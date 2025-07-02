@@ -9,6 +9,7 @@ app.use(express.static("."));
 
 const PORT = process.env.PORT || 3000;
 
+// ✅ Создание тикетов (мультиномер)
 app.post("/create-ticket", async (req, res) => {
   const {
     subject,
@@ -23,7 +24,6 @@ app.post("/create-ticket", async (req, res) => {
     return res.send("❌ Subject и Message обязательны");
   }
 
-  // Разделяем номера по запятой
   const phones = client_phone
     .split(",")
     .map(p => p.trim())
@@ -52,29 +52,78 @@ app.post("/create-ticket", async (req, res) => {
     }
   }
 
-  // Отдаём результат на одной странице
   res.send(results.join("<br>"));
 });
 
+// ✅ Создание клиента
 app.post("/create-client", async (req, res) => {
-  const { name, phone, email } = req.body;
+  const { name, emails, note, phone } = req.body;
 
   try {
     const response = await axios.post("https://api.usedesk.ru/create/client", {
       api_token: process.env.API_TOKEN,
       name,
-      phone,
-      email
+      emails,
+      note,
+      phone
     });
 
-    console.log("✅ Клиент создан:", response.data);
     res.send(`✅ Клиент создан! ID: ${response.data.client_id}`);
   } catch (error) {
-    console.error("❌ Ошибка создания клиента:", error.response?.data || error.message);
-    res.send("❌ Ошибка при создании клиента");
+    const err = error.response?.data?.error || error.message;
+    res.send("❌ Ошибка при создании клиента: " + err);
+  }
+});
+
+// ✅ Обновление клиента
+app.post("/update-client", async (req, res) => {
+  const { client_id, name, emails, position, note } = req.body;
+
+  try {
+    const response = await axios.post("https://api.usedesk.ru/update/client", {
+      api_token: process.env.API_TOKEN,
+      client_id,
+      name,
+      emails,
+      position,
+      note,
+      is_new_note: "true"
+    });
+
+    res.send("✅ Клиент обновлён");
+  } catch (error) {
+    const err = error.response?.data?.error || error.message;
+    res.send("❌ Ошибка при обновлении клиента: " + err);
+  }
+});
+
+// ✅ Поиск клиента
+app.post("/search-client", async (req, res) => {
+  const { query, search_type } = req.body;
+
+  try {
+    const response = await axios.post("https://api.usedesk.ru/clients", {
+      api_token: process.env.API_TOKEN,
+      query,
+      search_type
+    });
+
+    const clients = response.data.clients || [];
+    if (clients.length === 0) {
+      return res.send("⚠️ Ничего не найдено");
+    }
+
+    const list = clients.map(c =>
+      `ID: ${c.id}, Имя: ${c.name || "-"}, Email: ${c.emails?.join(", ") || "-"}, Тел: ${c.phone || "-"}`
+    );
+
+    res.send("🔍 Найдено:\n" + list.join("<br>"));
+  } catch (error) {
+    const err = error.response?.data?.error || error.message;
+    res.send("❌ Ошибка при поиске: " + err);
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Сервер запущен на порту ${PORT}`);
 });
