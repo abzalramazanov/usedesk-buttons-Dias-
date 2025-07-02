@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: usedesk-ticket-creator
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: API_TOKEN
+        fromEnv: API_TOKEN

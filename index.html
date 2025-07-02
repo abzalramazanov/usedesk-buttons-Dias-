@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>UseDesk Ticket Creator</title>
+</head>
+<body>
+  <h2>Создание тикета в UseDesk</h2>
+  <form action="/create-ticket" method="POST">
+    <label>Subject:</label><br><input type="text" name="subject"><br><br>
+    <label>Message:</label><br><textarea name="message" rows="4" cols="50"></textarea><br><br>
+    <label>Client ID:</label><br><input type="text" name="client_id"><br><br>
+    <label>Tag:</label><br><input type="text" name="tag"><br><br>
+    <label>Client Phone:</label><br><input type="text" name="client_phone"><br><br>
+    <label>User ID (агент):</label><br><input type="text" name="user_id" value="293880"><br><br>
+    <button type="submit">Создать тикет</button>
+  </form>
+</body>
+</html>
