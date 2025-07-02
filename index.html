@@ -2,32 +2,76 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>UseDesk Ticket Creator</title>
+  <title>UseDesk Tools</title>
 </head>
 <body>
-  <h2>Создание тикета в UseDesk</h2>
-  <form id="ticketForm">
-    <label>Subject*:</label><br><input type="text" name="subject" required><br><br>
-    <label>Message*:</label><br><textarea name="message" rows="4" cols="50" required></textarea><br><br>
-    <label>Client Phone:</label><br><input type="text" name="client_phone"><br><br>
-    <label>Tag (не обязат.):</label><br><input type="text" name="tag"><br><br>
-    <label>User ID (можно менять):</label><br><input type="text" name="user_id" value="293880"><br><br>
-    <label>Статус тикета:</label><br>
-<select name="status">
-  <option value="2">Выполнен</option>
-  <option value="3">Закрыт</option>
-  <option value="6">В ожидании</option>
-  <option value="9">Рассылка</option>
-</select><br><br>
-    <button type="submit">Создать тикет</button>
-  </form>
+  <h2>UseDesk Панель инструментов</h2>
 
-  <p id="responseMessage" style="font-weight: bold;"></p>
+  <!-- Кнопки переключения -->
+  <button onclick="showForm('ticketFormBlock')">📩 Создать тикет</button>
+  <button onclick="showForm('clientFormBlock')">👤 Создать клиента</button>
+  <button onclick="showForm('updateClientBlock')">🛠️ Обновить клиента</button>
+  <button onclick="showForm('sendMessageBlock')">📨 Отправить сообщение</button>
+
+  <hr>
+
+  <!-- 📩 Создание тикета -->
+  <div id="ticketFormBlock">
+    <h3>Создание тикета</h3>
+    <form id="ticketForm">
+      <label>Subject*:</label><br><input type="text" name="subject" required><br><br>
+      <label>Message*:</label><br><textarea name="message" rows="4" cols="50" required></textarea><br><br>
+      <label>Client Phone (через запятую):</label><br><input type="text" name="client_phone"><br><br>
+      <label>Tag (не обязат.):</label><br><input type="text" name="tag"><br><br>
+      <label>User ID (можно менять):</label><br><input type="text" name="user_id" value="293880"><br><br>
+      <label>Статус тикета:</label><br>
+      <select name="status">
+        <option value="2">Выполнен</option>
+        <option value="3">Закрыт</option>
+        <option value="6">В ожидании</option>
+        <option value="9">Рассылка</option>
+      </select><br><br>
+      <button type="submit">Создать тикет</button>
+    </form>
+    <p id="responseMessage" style="font-weight: bold;"></p>
+  </div>
+
+  <!-- 👤 Создание клиента -->
+  <div id="clientFormBlock" style="display:none;">
+    <h3>Создание клиента</h3>
+    <form id="clientForm">
+      <label>Имя клиента:</label><br>
+      <input type="text" name="name" required><br><br>
+      <label>Телефон:</label><br>
+      <input type="text" name="phone"><br><br>
+      <label>Email:</label><br>
+      <input type="text" name="email"><br><br>
+      <button type="submit">Создать клиента</button>
+    </form>
+    <p id="clientResponse" style="font-weight: bold;"></p>
+  </div>
+
+  <!-- 🛠️ Обновление клиента (будущий функционал) -->
+  <div id="updateClientBlock" style="display:none;">
+    <h3>Обновление клиента</h3>
+    <p>🔧 Здесь будет форма для обновления клиента</p>
+  </div>
+
+  <!-- 📨 Отправка сообщения (будущий функционал) -->
+  <div id="sendMessageBlock" style="display:none;">
+    <h3>Отправка сообщения</h3>
+    <p>📬 Здесь будет форма для отправки произвольного сообщения</p>
+  </div>
 
   <script>
+    function showForm(formId) {
+      const forms = ['ticketFormBlock', 'clientFormBlock', 'updateClientBlock', 'sendMessageBlock'];
+      forms.forEach(f => document.getElementById(f).style.display = 'none');
+      document.getElementById(formId).style.display = 'block';
+    }
+
     document.getElementById('ticketForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-
       const formData = new FormData(this);
       const data = Object.fromEntries(formData.entries());
 
@@ -38,7 +82,22 @@
       });
 
       const text = await res.text();
-      document.getElementById('responseMessage').innerText = text;
+      document.getElementById('responseMessage').innerHTML = text;
+    });
+
+    document.getElementById('clientForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await fetch('/create-client', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      const text = await res.text();
+      document.getElementById('clientResponse').innerText = text;
     });
   </script>
 </body>
