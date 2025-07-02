@@ -6,14 +6,33 @@
 </head>
 <body>
   <h2>Создание тикета в UseDesk</h2>
-  <form action="/create-ticket" method="POST">
+  <form id="ticketForm">
     <label>Subject*:</label><br><input type="text" name="subject" required><br><br>
     <label>Message*:</label><br><textarea name="message" rows="4" cols="50" required></textarea><br><br>
-    <label>Client ID:</label><br><input type="text" name="client_id"><br><br>
-    <label>Tag:</label><br><input type="text" name="tag"><br><br>
     <label>Client Phone:</label><br><input type="text" name="client_phone"><br><br>
-    <label>User ID (агент):</label><br><input type="text" name="user_id" value="293880"><br><br>
+    <label>Tag (не обязат.):</label><br><input type="text" name="tag"><br><br>
+    <label>User ID (можно менять):</label><br><input type="text" name="user_id" value="293880"><br><br>
     <button type="submit">Создать тикет</button>
   </form>
+
+  <p id="responseMessage" style="font-weight: bold;"></p>
+
+  <script>
+    document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await fetch('/create-ticket', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      const text = await res.text();
+      document.getElementById('responseMessage').innerText = text;
+    });
+  </script>
 </body>
 </html>
