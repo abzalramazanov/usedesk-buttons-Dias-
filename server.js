@@ -55,7 +55,7 @@ app.post("/create-ticket", async (req, res) => {
   res.send(results.join("<br>"));
 });
 
-// ✅ Создание клиента
+// ✅ Создание клиента (с отображением данных)
 app.post("/create-client", async (req, res) => {
   const { name, emails, note, phone } = req.body;
 
@@ -68,12 +68,18 @@ app.post("/create-client", async (req, res) => {
       phone
     });
 
-    const clientId = response.data.client?.id;
-    if (clientId) {
-      res.send(`✅ Клиент создан! ID: ${clientId}`);
+    const client = response.data.client;
+
+    if (client && client.id) {
+      res.send(`✅ Клиент создан!<br>
+        Имя: ${client.name || "-"}<br>
+        Email: ${client.emails?.join(", ") || "-"}<br>
+        Телефон: ${client.phone || "-"}<br>
+        Заметки: ${client.note || "-"}`);
     } else {
-      res.send("⚠️ Клиент создан, но ID не найден в ответе");
+      res.send("⚠️ Клиент создан, но объект клиента не вернулся (возможно, дубликат или минимальный ответ).");
     }
+
   } catch (error) {
     const err = error.response?.data?.error || error.message;
     res.send("❌ Ошибка при создании клиента: " + err);
