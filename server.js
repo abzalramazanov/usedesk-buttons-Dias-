@@ -11,7 +11,12 @@ const PORT = process.env.PORT || 3000;
 
 app.post("/create-ticket", async (req, res) => {
   const {
-    subject, message, client_phone, tag, user_id
+    subject,
+    message,
+    client_phone,
+    tag,
+    user_id,
+    status
   } = req.body;
 
   if (!subject || !message) {
@@ -25,7 +30,9 @@ app.post("/create-ticket", async (req, res) => {
       message,
       client_phone,
       channel_id: 66235,
-      from: "user"
+      from: "user",
+      status: Number(status), // преобразуем строку в число
+      tag
     });
 
     console.log("✅ Ответ:", response.data);
