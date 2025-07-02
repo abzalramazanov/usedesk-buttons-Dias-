@@ -9,16 +9,9 @@ app.use(express.static("."));
 
 const PORT = process.env.PORT || 3000;
 
-// ✅ Создание тикетов (мультиномер)
+// ✅ Создание тикета на несколько номеров
 app.post("/create-ticket", async (req, res) => {
-  const {
-    subject,
-    message,
-    client_phone,
-    tag,
-    user_id,
-    status
-  } = req.body;
+  const { subject, message, client_phone, tag, user_id, status } = req.body;
 
   if (!subject || !message) {
     return res.send("❌ Subject и Message обязательны");
@@ -55,7 +48,7 @@ app.post("/create-ticket", async (req, res) => {
   res.send(results.join("<br>"));
 });
 
-// ✅ Создание клиента (с отображением данных)
+// ✅ Создание клиента (emails → array + универсальный client_id)
 app.post("/create-client", async (req, res) => {
   const { name, emails, note, phone } = req.body;
 
@@ -63,25 +56,33 @@ app.post("/create-client", async (req, res) => {
     const response = await axios.post("https://api.usedesk.ru/create/client", {
       api_token: process.env.API_TOKEN,
       name,
-      emails,
+      emails: emails ? [emails] : [],
       note,
       phone
     });
 
-    const client = response.data.client;
+    const clientId = response.data.client_id || response.data.client?.id;
 
-    if (client && client.id) {
-      res.send(`✅ Клиент создан!<br>
-        Имя: ${client.name || "-"}<br>
-        Email: ${client.emails?.join(", ") || "-"}<br>
-        Телефон: ${client.phone || "-"}<br>
-        Заметки: ${client.note || "-"}`);
+    if (clientId) {
+      res.send(`✅ Клиент создан! ID: ${clientId}<br>
+        Имя: ${name || "-"}<br>
+        Email: ${emails || "-"}<br>
+        Телефон: ${phone || "-"}<br>
+        Заметки: ${note || "-"}`);
     } else {
-      res.send("⚠️ Клиент создан, но объект клиента не вернулся (возможно, дубликат или минимальный ответ).");
+      res.send("⚠️ Клиент создан, но ID не получен. Возможно, дубликат или урезанный ответ.");
     }
 
   } catch (error) {
-    const err = error.response?.data?.error || error.message;
+    const errData = error.response?.data;
+    if (errData?.error) {
+      const formatted = Object.entries(errData.error)
+        .map(([field, msg]) => `❌ ${field}: ${msg.join(", ")}`)
+        .join("<br>");
+      return res.send(formatted);
+    }
+
+    const err = errData?.error || error.message;
     res.send("❌ Ошибка при создании клиента: " + err);
   }
 });
@@ -95,7 +96,7 @@ app.post("/update-client", async (req, res) => {
       api_token: process.env.API_TOKEN,
       client_id,
       name,
-      emails,
+      emails: emails ? [emails] : [],
       position,
       note,
       is_new_note: "true"
