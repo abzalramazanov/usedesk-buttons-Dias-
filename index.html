@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>UseDesk Tools</title>
+</head>
+<body>
+  <h2>UseDesk Панель инструментов</h2>
+
+  <button onclick="showForm('ticketFormBlock')">📩 Создать тикет</button>
+  <button onclick="showForm('clientFormBlock')">👤 Создать клиента</button>
+  <button onclick="showForm('updateClientBlock')">🛠️ Обновить клиента</button>
+  <button onclick="showForm('sendMessageBlock')">📨 Отправить сообщение</button>
+  <button onclick="showForm('searchClientBlock')">🔍 Поиск клиента</button>
+
+  <hr>
+
+  <div id="ticketFormBlock">
+    <h3>Создание тикета</h3>
+    <form id="ticketForm">
+      <label>Subject*:</label><br><input type="text" name="subject" required><br><br>
+      <label>Message*:</label><br><textarea name="message" rows="4" cols="50" required></textarea><br><br>
+      <label>Client Phone (через запятую):</label><br><input type="text" name="client_phone"><br><br>
+      <label>Tag (не обязат.):</label><br><input type="text" name="tag"><br><br>
+      <label>User ID (можно менять):</label><br><input type="text" name="user_id" value="293880"><br><br>
+      <label>Статус тикета:</label><br>
+      <select name="status">
+        <option value="2">Выполнен</option>
+        <option value="3">Закрыт</option>
+        <option value="6">В ожидании</option>
+        <option value="9">Рассылка</option>
+      </select><br><br>
+      <button type="submit">Создать тикет</button>
+    </form>
+    <p id="responseMessage" style="font-weight: bold;"></p>
+  </div>
+
+  <div id="clientFormBlock" style="display:none;">
+    <h3>Создание клиента</h3>
+    <form id="clientForm">
+      <label>Имя:</label><br><input type="text" name="name"><br><br>
+      <label>Email:</label><br><input type="email" name="emails"><br><br>
+      <label>Заметки:</label><br><input type="text" name="note"><br><br>
+      <label>Телефон:</label><br><input type="text" name="phone"><br><br>
+      <button type="submit">Создать клиента</button>
+    </form>
+    <p id="clientResponse" style="font-weight: bold;"></p>
+  </div>
+
+  <div id="updateClientBlock" style="display:none;">
+    <h3>Обновление клиента</h3>
+    <form id="updateForm">
+      <label>ID клиента:</label><br><input type="text" name="client_id"><br><br>
+      <label>Новое имя:</label><br><input type="text" name="name"><br><br>
+      <label>Новый email:</label><br><input type="email" name="emails"><br><br>
+      <label>Новая позиция:</label><br><input type="text" name="position"><br><br>
+      <label>Новая заметка:</label><br><input type="text" name="note"><br><br>
+      <button type="submit">Обновить клиента</button>
+    </form>
+    <p id="updateResponse" style="font-weight: bold;"></p>
+  </div>
+
+  <div id="sendMessageBlock" style="display:none;">
+    <h3>Отправка сообщения</h3>
+    <p>📬 Здесь будет форма для отправки произвольного сообщения</p>
+  </div>
+
+  <div id="searchClientBlock" style="display:none;">
+    <h3>Поиск клиента</h3>
+    <form id="searchForm">
+      <label>Имя или номер телефона:</label><br><input type="text" name="query"><br><br>
+      <button type="submit">Найти клиента</button>
+    </form>
+    <p id="searchResponse" style="font-weight: bold;"></p>
+  </div>
+
+  <script>
+    function showForm(formId) {
+      const forms = ['ticketFormBlock', 'clientFormBlock', 'updateClientBlock', 'sendMessageBlock', 'searchClientBlock'];
+      forms.forEach(f => document.getElementById(f).style.display = 'none');
+      document.getElementById(formId).style.display = 'block';
+    }
+
+    document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await fetch('/create-ticket', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      const text = await res.text();
+      document.getElementById('responseMessage').innerHTML = text;
+    });
+
+    document.getElementById('clientForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await fetch('/create-client', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      const text = await res.text();
+      document.getElementById('clientResponse').innerText = text;
+    });
+
+    document.getElementById('updateForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      data.is_new_note = "true";
+
+      const res = await fetch('/update-client', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      const text = await res.text();
+      document.getElementById('updateResponse').innerText = text;
+    });
+
+    document.getElementById('searchForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      data.search_type = "partial_match";
+
+      const res = await fetch('/search-client', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      const text = await res.text();
+      document.getElementById('searchResponse').innerText = text;
+    });
+  </script>
+</body>
+</html>
