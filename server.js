@@ -68,7 +68,12 @@ app.post("/create-client", async (req, res) => {
       phone
     });
 
-    res.send(`✅ Клиент создан! ID: ${response.data.client_id}`);
+    const clientId = response.data.client?.id;
+    if (clientId) {
+      res.send(`✅ Клиент создан! ID: ${clientId}`);
+    } else {
+      res.send("⚠️ Клиент создан, но ID не найден в ответе");
+    }
   } catch (error) {
     const err = error.response?.data?.error || error.message;
     res.send("❌ Ошибка при создании клиента: " + err);
@@ -80,7 +85,7 @@ app.post("/update-client", async (req, res) => {
   const { client_id, name, emails, position, note } = req.body;
 
   try {
-    const response = await axios.post("https://api.usedesk.ru/update/client", {
+    await axios.post("https://api.usedesk.ru/update/client", {
       api_token: process.env.API_TOKEN,
       client_id,
       name,
@@ -108,8 +113,8 @@ app.post("/search-client", async (req, res) => {
       search_type
     });
 
-    const clients = response.data.clients || [];
-    if (clients.length === 0) {
+    const clients = response.data.clients;
+    if (!clients || clients.length === 0) {
       return res.send("⚠️ Ничего не найдено");
     }
 
@@ -117,7 +122,7 @@ app.post("/search-client", async (req, res) => {
       `ID: ${c.id}, Имя: ${c.name || "-"}, Email: ${c.emails?.join(", ") || "-"}, Тел: ${c.phone || "-"}`
     );
 
-    res.send("🔍 Найдено:\n" + list.join("<br>"));
+    res.send("🔍 Найдено:<br>" + list.join("<br>"));
   } catch (error) {
     const err = error.response?.data?.error || error.message;
     res.send("❌ Ошибка при поиске: " + err);
