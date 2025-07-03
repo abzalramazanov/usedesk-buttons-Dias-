@@ -3,6 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>UseDesk Tools</title>
+
+  <!-- 💫 Стили для спиннера -->
+  <style>
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ccc;
+      border-top: 2px solid #333;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
   <h2>UseDesk Панель инструментов</h2>
@@ -16,38 +35,38 @@
   <hr>
 
   <div id="ticketFormBlock">
-  <h3>Создание тикета</h3>
-  <form id="ticketForm">
-    <label>Subject*:</label><br><input type="text" name="subject" required><br><br>
-    <label>Message*:</label><br><textarea name="message" rows="4" cols="50" required></textarea><br><br>
-    <label>Client Phone (через запятую):</label><br><input type="text" name="client_phone"><br><br>
-    <label>Tag (не обязат.):</label><br><input type="text" name="tag"><br><br>
+    <h3>Создание тикета</h3>
+    <form id="ticketForm">
+      <label>Subject*:</label><br><input type="text" name="subject" required><br><br>
+      <label>Message*:</label><br><textarea name="message" rows="4" cols="50" required></textarea><br><br>
+      <label>Client Phone (через запятую):</label><br><input type="text" name="client_phone"><br><br>
+      <label>Tag (не обязат.):</label><br><input type="text" name="tag"><br><br>
 
-    <label>Назначить на:</label><br>
-    <select name="user_id">
-      <option value="293758">Superuser</option>
-      <option value="293880">Диас</option>
-      <option value="294126">Дархан</option>
-    </select><br><br>
+      <label>Назначить на:</label><br>
+      <select name="user_id">
+        <option value="293758">Superuser</option>
+        <option value="293880">Диас</option>
+        <option value="294126">Дархан</option>
+      </select><br><br>
 
-    <label>Тип сообщения:</label><br>
-    <select name="message_type">
-      <option value="public">Публичный</option>
-      <option value="private">Комментарии</option>
-    </select><br><br>
+      <label>Тип сообщения:</label><br>
+      <select name="message_type">
+        <option value="public">Публичный</option>
+        <option value="private">Комментарии</option>
+      </select><br><br>
 
-    <label>Статус тикета:</label><br>
-    <select name="status">
-      <option value="2">Выполнен</option>
-      <option value="3">Закрыт</option>
-      <option value="6">В ожидании</option>
-      <option value="9">Рассылка</option>
-    </select><br><br>
+      <label>Статус тикета:</label><br>
+      <select name="status">
+        <option value="2">Выполнен</option>
+        <option value="3">Закрыт</option>
+        <option value="6">В ожидании</option>
+        <option value="9">Рассылка</option>
+      </select><br><br>
 
-    <button type="submit">Создать тикет</button>
-  </form>
-  <p id="responseMessage" style="font-weight: bold;"></p>
-</div>
+      <button type="submit">Создать тикет</button>
+    </form>
+    <p id="responseMessage" style="font-weight: bold;"></p>
+  </div>
 
   <div id="clientFormBlock" style="display:none;">
     <h3>Создание клиента</h3>
@@ -95,50 +114,82 @@
       document.getElementById(formId).style.display = 'block';
     }
 
+    // 🔄 Показ спиннера
+    function showSpinner(elementId, text = "Загрузка...") {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.innerHTML = `<span class="spinner"></span>${text}`;
+      }
+    }
+
+    // ✅ Отображение результата
+    function setResult(elementId, html) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.innerHTML = html;
+      }
+    }
+
     document.getElementById('ticketForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));
+      showSpinner('responseMessage', 'Создание тикета...');
+
       const res = await fetch('/create-ticket', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      document.getElementById('responseMessage').innerHTML = await res.text();
+
+      const text = await res.text();
+      setResult('responseMessage', text);
     });
 
     document.getElementById('clientForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(this));
-  const res = await fetch('/create-client', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  document.getElementById('clientResponse').innerHTML = await res.text(); // ✅ фикс
-});
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      showSpinner('clientResponse', 'Создание клиента...');
+
+      const res = await fetch('/create-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const text = await res.text();
+      setResult('clientResponse', text);
+    });
 
     document.getElementById('updateForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));
       data.is_new_note = "true";
+      showSpinner('updateResponse', 'Обновление клиента...');
+
       const res = await fetch('/update-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      document.getElementById('updateResponse').innerText = await res.text();
+
+      const text = await res.text();
+      setResult('updateResponse', text);
     });
 
     document.getElementById('searchForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));
       data.search_type = "partial_match";
+      showSpinner('searchResponse', 'Поиск клиента...');
+
       const res = await fetch('/search-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      document.getElementById('searchResponse').innerHTML = await res.text();
+
+      const text = await res.text();
+      setResult('searchResponse', text);
     });
   </script>
 </body>
