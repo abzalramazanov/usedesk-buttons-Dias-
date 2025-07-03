@@ -258,18 +258,23 @@
       setResult('responseMessage', text);
     });
 
-    document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      showSpinner('responseMessage', 'Поиск клиента...');
-      const res = await fetch('/search-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const text = await res.text();
-      setResult('responseMessage', text);
-    });
+document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const data = Object.fromEntries(formData.entries());
+
+  // Добавляем вручную тип поиска
+  data.search_type = "partial_match";
+
+  showSpinner('responseMessage', 'Поиск клиента...');
+  const res = await fetch('/search-client', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  const text = await res.text();
+  setResult('responseMessage', text);
+});
 
     document.getElementById('createClientForm').addEventListener('submit', async function(e) {
       e.preventDefault();
