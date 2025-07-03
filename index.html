@@ -93,15 +93,15 @@
     });
 
     document.getElementById('clientForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      const res = await fetch('/create-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      document.getElementById('clientResponse').innerText = await res.text();
-    });
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(this));
+  const res = await fetch('/create-client', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  document.getElementById('clientResponse').innerHTML = await res.text(); // ✅ фикс
+});
 
     document.getElementById('updateForm').addEventListener('submit', async function(e) {
       e.preventDefault();
