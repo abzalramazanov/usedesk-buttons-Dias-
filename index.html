@@ -222,6 +222,12 @@
   <div id="responseMessage"></div>
 
   <script>
+    function normalizePhone(raw) {
+      const cleaned = raw.replace(/[^0-9]/g, '');
+      if (cleaned.length < 11) return null;
+      return cleaned.replace(/^8/, '7').replace(/^\+7/, '7');
+    }
+
     function showSpinner(elementId, text = "Загрузка...") {
       const el = document.getElementById(elementId);
       if (el) {
@@ -260,6 +266,11 @@
     document.getElementById('ticketForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));
+      if (data.client_phone) {
+        const phones = data.client_phone.split(',').map(normalizePhone).filter(Boolean);
+        if (!phones.length) return alert("❗ Введите хотя бы один корректный номер телефона (11 цифр)");
+        data.client_phone = phones.join(',');
+      }
       showSpinner('responseMessage', 'Создание тикета...');
       const res = await fetch('/create-ticket', {
         method: 'POST',
@@ -272,10 +283,9 @@
 
     document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
+      const data = Object.fromEntries(new FormData(this));
+      data.query = normalizePhone(data.query) || data.query;
       data.search_type = "partial_match";
-
       showSpinner('responseMessage', 'Поиск клиента...');
       const res = await fetch('/search-client', {
         method: 'POST',
@@ -283,12 +293,10 @@
         body: JSON.stringify(data)
       });
       const result = await res.json();
-
       if (result.error) {
         setResult('responseMessage', `<div class="response-box error">❌ ${result.error}</div>`);
         return;
       }
-
       const clients = result.clients;
       const html = clients.map(c => `
         <div class="client-result">
@@ -302,13 +310,17 @@
           </ul>
         </div>
       `).join('');
-
       setResult('responseMessage', html);
     });
 
     document.getElementById('createClientForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));
+      if (data.phone) {
+        const phone = normalizePhone(data.phone);
+        if (!phone) return alert("❗ Введите корректный номер телефона (11 цифр)");
+        data.phone = phone;
+      }
       showSpinner('responseMessage', 'Создание клиента...');
       const res = await fetch('/create-client', {
         method: 'POST',
@@ -322,6 +334,11 @@
     document.getElementById('updateClientForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));
+      if (data.phone) {
+        const phone = normalizePhone(data.phone);
+        if (!phone) return alert("❗ Введите корректный номер телефона (11 цифр)");
+        data.phone = phone;
+      }
       showSpinner('responseMessage', 'Обновление клиента...');
       const res = await fetch('/update-client', {
         method: 'POST',
