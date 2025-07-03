@@ -16,24 +16,38 @@
   <hr>
 
   <div id="ticketFormBlock">
-    <h3>Создание тикета</h3>
-    <form id="ticketForm">
-      <label>Subject*:</label><br><input type="text" name="subject" required><br><br>
-      <label>Message*:</label><br><textarea name="message" rows="4" cols="50" required></textarea><br><br>
-      <label>Client Phone (через запятую):</label><br><input type="text" name="client_phone"><br><br>
-      <label>Tag (не обязат.):</label><br><input type="text" name="tag"><br><br>
-      <label>User ID:</label><br><input type="text" name="user_id" value="293880"><br><br>
-      <label>Статус тикета:</label><br>
-      <select name="status">
-        <option value="2">Выполнен</option>
-        <option value="3">Закрыт</option>
-        <option value="6">В ожидании</option>
-        <option value="9">Рассылка</option>
-      </select><br><br>
-      <button type="submit">Создать тикет</button>
-    </form>
-    <p id="responseMessage" style="font-weight: bold;"></p>
-  </div>
+  <h3>Создание тикета</h3>
+  <form id="ticketForm">
+    <label>Subject*:</label><br><input type="text" name="subject" required><br><br>
+    <label>Message*:</label><br><textarea name="message" rows="4" cols="50" required></textarea><br><br>
+    <label>Client Phone (через запятую):</label><br><input type="text" name="client_phone"><br><br>
+    <label>Tag (не обязат.):</label><br><input type="text" name="tag"><br><br>
+
+    <label>Назначить на:</label><br>
+    <select name="user_id">
+      <option value="293758">Superuser</option>
+      <option value="293880">Диас</option>
+      <option value="294126">Дархан</option>
+    </select><br><br>
+
+    <label>Тип сообщения:</label><br>
+    <select name="message_type">
+      <option value="public">Публичный</option>
+      <option value="private">Комментарии</option>
+    </select><br><br>
+
+    <label>Статус тикета:</label><br>
+    <select name="status">
+      <option value="2">Выполнен</option>
+      <option value="3">Закрыт</option>
+      <option value="6">В ожидании</option>
+      <option value="9">Рассылка</option>
+    </select><br><br>
+
+    <button type="submit">Создать тикет</button>
+  </form>
+  <p id="responseMessage" style="font-weight: bold;"></p>
+</div>
 
   <div id="clientFormBlock" style="display:none;">
     <h3>Создание клиента</h3>
