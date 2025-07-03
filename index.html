@@ -126,34 +126,13 @@
       cursor: pointer;
     }
 
-    .client-result-table {
-      border-collapse: collapse;
-      width: 100%;
-      max-width: 800px;
-      background: var(--form-bg);
+    .client-result {
+      background: var(--success-bg);
       color: var(--text-color);
+      padding: 20px;
       margin-top: 20px;
-      font-size: 15px;
-    }
-
-    .client-result-table td, .client-result-table th {
-      border: 1px solid var(--border-color);
-      padding: 8px 12px;
-    }
-
-    .client-result-table th {
-      background: var(--bg-color);
-      text-align: left;
-    }
-
-    .client-result-table ul {
-      list-style-type: none;
-      padding-left: 0;
-      margin: 0;
-    }
-
-    .client-result-table ul li {
-      margin-bottom: 4px;
+      border-radius: 12px;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -161,10 +140,7 @@
   <button class="theme-toggle" onclick="toggleTheme()" title="Переключить тему">🌙</button>
   <h2>UseDesk Панель инструментов</h2>
 
-  <button onclick="showBlock('ticketForm')">📩 Создать тикет</button>
   <button onclick="showBlock('clientSearchForm')">🔍 Найти клиента</button>
-  <button onclick="showBlock('createClientForm')">👤 Создать клиента</button>
-  <button onclick="showBlock('updateClientForm')">🛠 Обновить клиента</button>
 
   <form id="clientSearchForm" style="display:block">
     <label>Номер телефона или имя:</label>
@@ -185,9 +161,7 @@
     function setResult(elementId, html) {
       const el = document.getElementById(elementId);
       if (el) {
-        const isError = html.includes("❌");
-        const boxClass = isError ? "error" : "success";
-        el.innerHTML = `<div class="response-box ${boxClass}">${html}</div>`;
+        el.innerHTML = html;
       }
     }
 
@@ -224,25 +198,28 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      const text = await res.text();
+      const result = await res.json();
 
-      const match = text.match(/ID: (\d+)<br>Имя: (.*?)<br>Email: (.*?)<br>Тел: (.*?)<br>Тикеты: (.*)/);
-      if (match) {
-        const [, id, name, email, phone, ticketsRaw] = match;
-        const tickets = ticketsRaw.match(/\d+/g) || [];
-        const formatted = `
-          <table class="client-result-table">
-            <tr><th>ID</th><td><a href="https://secure.usedesk.ru/clients/details/${id}" target="_blank">${id}</a></td></tr>
-            <tr><th>Имя</th><td>${name}</td></tr>
-            <tr><th>Телефон</th><td>${phone}</td></tr>
-            <tr><th>Email</th><td>${email}</td></tr>
-            <tr><th>Тикеты</th><td><ul>${tickets.map(t => `<li><a href='https://secure.usedesk.ru/tickets/${t}' target='_blank'>${t}</a></li>`).join('')}</ul></td></tr>
-          </table>
-        `;
-        setResult('responseMessage', formatted);
-      } else {
-        setResult('responseMessage', text);
+      if (result.error) {
+        setResult('responseMessage', `<div class="response-box error">❌ ${result.error}</div>`);
+        return;
       }
+
+      const clients = result.clients;
+      const html = clients.map(c => `
+        <div class="client-result">
+          <strong>ID:</strong> <a href="https://secure.usedesk.ru/clients/details/${c.id}" target="_blank">${c.id}</a><br>
+          <strong>Имя:</strong> ${c.name}<br>
+          <strong>Email:</strong> ${c.email}<br>
+          <strong>Тел:</strong> ${c.phone}<br>
+          <strong>Тикеты:</strong>
+          <ul>
+            ${c.tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
+
+      setResult('responseMessage', html);
     });
   </script>
 </body>
