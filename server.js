@@ -58,8 +58,9 @@ app.post("/create-ticket", async (req, res) => {
 
 // ✅ Поиск клиента
 app.post("/search-client", async (req, res) => {
-  let { query } = req.body;
-  query = String(query || "").replace(/[^0-9]/g, "").replace(/^8/, "7");
+let { query } = req.body;
+query = String(query || "").replace(/[^0-9]/g, "").replace(/^8/, "7");
+console.log("🔍 Поиск по:", query); // 👈 ОБЯЗАТЕЛЬНО
 
   try {
     const response = await axios.post("https://api.usedesk.ru/clients", {
