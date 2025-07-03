@@ -111,10 +111,22 @@ app.post("/update-client", async (req, res) => {
   }
 });
 
-// ✅ Поиск клиента (табличный вывод)
 app.post("/search-client", async (req, res) => {
   let { query } = req.body;
-  query = String(query || "").replace(/[^0-9]/g, "");
+
+  // Очистка номера: убираем всё, кроме цифр
+  const digitsOnly = String(query || "").replace(/\D/g, "");
+
+  // Приводим к формату 770..., если начиналось с 8 или 7
+  if (digitsOnly.length === 11 && digitsOnly.startsWith("8")) {
+    query = "7" + digitsOnly.slice(1); // 8702... -> 7702...
+  } else if (digitsOnly.length === 11 && digitsOnly.startsWith("7")) {
+    query = digitsOnly;
+  } else if (digitsOnly.length === 10) {
+    query = "7" + digitsOnly; // 702... -> 7702...
+  } else {
+    query = digitsOnly; // fallback
+  }
 
   try {
     const response = await axios.post("https://api.usedesk.ru/clients", {
@@ -133,17 +145,18 @@ app.post("/search-client", async (req, res) => {
     }
 
     const tableHTML = clients.map(c => {
-      const ticketList = c.tickets?.length
-        ? `<ul style="margin:0; padding-left:20px; max-height:150px; overflow-y:auto;">${c.tickets.map(t => `<li>${t}</li>`).join("")}</ul>`
+      const emailStr = Array.isArray(c.emails) ? c.emails.join(", ") : "-";
+      const ticketList = Array.isArray(c.tickets) && c.tickets.length
+        ? `<ul style="margin:0; padding-left:20px;">${c.tickets.map(t => `<li>${t}</li>`).join("")}</ul>`
         : "-";
 
       return `
         <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px; border-collapse: collapse; width: 100%; max-width: 700px;">
-          <tr><th style="text-align:left;">ID</th><td>${c.id}</td></tr>
-          <tr><th style="text-align:left;">Имя</th><td>${c.name || "-"}</td></tr>
-          <tr><th style="text-align:left;">Телефон</th><td>${c.phone || "-"}</td></tr>
-          <tr><th style="text-align:left;">Email</th><td>${(c.emails && c.emails.join(", ")) || "-"}</td></tr>
-          <tr><th style="text-align:left;">Тикеты</th><td>${ticketList}</td></tr>
+          <tr><th>ID</th><td>${c.id}</td></tr>
+          <tr><th>Имя</th><td>${c.name || "-"}</td></tr>
+          <tr><th>Телефон</th><td>${c.phone || "-"}</td></tr>
+          <tr><th>Email</th><td>${emailStr}</td></tr>
+          <tr><th>Тикеты</th><td>${ticketList}</td></tr>
         </table>
       `;
     }).join("");
@@ -154,6 +167,7 @@ app.post("/search-client", async (req, res) => {
     res.send("❌ Ошибка при поиске: " + err);
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`🚀 Сервер запущен на порту ${PORT}`);
