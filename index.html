@@ -1,146 +1,226 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const axios = require("axios");
-require("dotenv").config();
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>UseDesk Tools</title>
+  <style>
+    :root {
+      --bg-color: #f5f5f7;
+      --text-color: #1d1d1f;
+      --form-bg: #fff;
+      --border-color: #d2d2d7;
+      --primary: #0071e3;
+      --primary-hover: #005bb5;
+      --success-bg: #e7f1ff;
+      --success-color: #0071e3;
+      --error-bg: #fff3f3;
+      --error-color: #d93025;
+    }
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+    body.dark-mode {
+      --bg-color: #1d1d1f;
+      --text-color: #f5f5f7;
+      --form-bg: #2c2c2e;
+      --border-color: #3a3a3c;
+      --primary: #0a84ff;
+      --primary-hover: #0060df;
+      --success-bg: #1e3a5f;
+      --success-color: #0a84ff;
+      --error-bg: #3f2b2b;
+      --error-color: #ff453a;
+    }
 
-app.use(bodyParser.json());
-app.use(express.static("."));
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-color);
+      margin: 0;
+      padding: 40px;
+      color: var(--text-color);
+      transition: background 0.3s, color 0.3s;
+    }
 
-// ✅ Создание тикета
-app.post("/create-ticket", async (req, res) => {
-  const { subject, message, client_phone, tag, user_id, status, message_type } = req.body;
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 30px;
+    }
 
-  if (!subject || !message) {
-    return res.send("❌ Subject и Message обязательны");
-  }
+    button, select, input, textarea {
+      font-size: 16px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--form-bg);
+      color: var(--text-color);
+      transition: all 0.2s ease;
+    }
 
-  const phones = client_phone
-    .split(",")
-    .map(p => p.replace(/[^0-9]/g, "").replace(/^8/, "7").replace(/^\+7/, "7"))
-    .filter(p => p.length > 0);
+    button {
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+    }
 
-  const results = [];
+    button:hover {
+      background-color: var(--primary-hover);
+    }
 
-  for (const phone of phones) {
-    try {
-      const payload = {
-        api_token: process.env.API_TOKEN,
-        subject,
-        message,
-        client_phone: phone,
-        channel_id: 66235,
-        from: "user",
-        status: Number(status),
-        tag,
-        assignee_id: user_id,
-      };
+    form {
+      background: var(--form-bg);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      max-width: 640px;
+      margin-bottom: 40px;
+      transition: background 0.3s;
+    }
 
-      if (message_type === "private") {
-        payload.private_comment = "true";
+    label {
+      font-weight: 500;
+      display: block;
+      margin: 12px 0 4px;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    .response-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .response-box.success {
+      background: var(--success-bg);
+      color: var(--success-color);
+      border-left: 5px solid var(--success-color);
+    }
+
+    .response-box.error {
+      background: var(--error-bg);
+      color: var(--error-color);
+      border-left: 5px solid var(--error-color);
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .client-result {
+      background: var(--success-bg);
+      color: var(--text-color);
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Переключить тему">🌙</button>
+  <h2>UseDesk Панель инструментов</h2>
+
+  <button onclick="showBlock('clientSearchForm')">🔍 Найти клиента</button>
+
+  <form id="clientSearchForm" style="display:block">
+    <label>Номер телефона или имя:</label>
+    <input type="text" name="query" required>
+    <button type="submit">Найти клиента</button>
+  </form>
+
+  <div id="responseMessage"></div>
+
+  <script>
+    function showSpinner(elementId, text = "Загрузка...") {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.innerHTML = `<span style='color:var(--text-color);'>⏳ ${text}</span>`;
+      }
+    }
+
+    function setResult(elementId, html) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.innerHTML = html;
+      }
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.querySelector('.theme-toggle');
+      const dark = body.classList.toggle('dark-mode');
+      btn.textContent = dark ? '☀️' : '🌙';
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+    }
+
+    function showBlock(id) {
+      document.querySelectorAll('form').forEach(f => f.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+    }
+
+    window.onload = () => {
+      const theme = localStorage.getItem('theme');
+      if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.theme-toggle').textContent = '☀️';
+      }
+    }
+
+    document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      data.search_type = "partial_match";
+
+      showSpinner('responseMessage', 'Поиск клиента...');
+      const res = await fetch('/search-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+
+      if (result.error) {
+        setResult('responseMessage', `<div class="response-box error">❌ ${result.error}</div>`);
+        return;
       }
 
-      const response = await axios.post("https://api.usedesk.ru/create/ticket", payload);
+      const clients = result.clients;
+      const html = clients.map(c => `
+        <div class="client-result">
+          <strong>ID:</strong> <a href="https://secure.usedesk.ru/clients/details/${c.id}" target="_blank">${c.id}</a><br>
+          <strong>Имя:</strong> ${c.name}<br>
+          <strong>Email:</strong> ${c.email}<br>
+          <strong>Тел:</strong> ${c.phone}<br>
+          <strong>Тикеты:</strong>
+          <ul>
+            ${c.tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
 
-      const ticket_id = response.data.ticket_id || response.data.ticket?.id;
-      const link = `https://secure.usedesk.ru/tickets/${ticket_id}`;
-      results.push(`✅ ${phone}: <a href="${link}" target="_blank">тикет ID ${ticket_id}</a>`);
-    } catch (error) {
-      const err = error.response?.data?.error || error.message;
-      results.push(`❌ ${phone}: ошибка — ${err}`);
-    }
-  }
-
-  res.send(results.join("<br>"));
-});
-
-// ✅ Поиск клиента (отдаёт JSON для Apple UI)
-app.post("/search-client", async (req, res) => {
-  let { query } = req.body;
-  query = String(query || "").replace(/[^0-9]/g, "").replace(/^8/, "7");
-  console.log("🔍 Поиск по:", query);
-
-  try {
-    const response = await axios.post("https://api.usedesk.ru/clients", {
-      api_token: process.env.API_TOKEN,
-      query,
-      search_type: "partial_match"
+      setResult('responseMessage', html);
     });
-
-    const clients = Array.isArray(response.data) ? response.data : response.data.clients;
-    if (!clients || clients.length === 0) {
-      return res.json({ error: "Ничего не найдено" });
-    }
-
-    const formatted = clients.map(c => ({
-      id: c.id,
-      name: c.name || "-",
-      email: Array.isArray(c.emails) ? c.emails.join(", ") : "-",
-      phone: c.phone || "-",
-      tickets: c.tickets || []
-    }));
-
-    res.json({ clients: formatted });
-  } catch (error) {
-    const err = error.response?.data?.error || error.message;
-    res.json({ error: "Ошибка при поиске: " + err });
-  }
-});
-
-// ✅ Создание клиента
-app.post("/create-client", async (req, res) => {
-  const { name, emails, note, phone } = req.body;
-
-  try {
-    const response = await axios.post("https://api.usedesk.ru/create/client", {
-      api_token: process.env.API_TOKEN,
-      name,
-      emails: emails ? [emails] : [],
-      note,
-      phone: phone?.replace(/[^0-9]/g, "").replace(/^8/, "7")
-    });
-
-    const clientId = response.data.client_id || response.data.client?.id;
-    if (clientId) {
-      const link = `https://secure.usedesk.ru/clients/details/${clientId}`;
-      res.send(`✅ Клиент создан! <a href="${link}" target="_blank">ID: ${clientId}</a><br>
-        Имя: ${name || "-"}<br>
-        Email: ${emails || "-"}<br>
-        Телефон: ${phone || "-"}<br>
-        Заметки: ${note || "-"}`);
-    } else {
-      res.send("⚠️ Клиент создан, но ID не получен.");
-    }
-  } catch (error) {
-    const err = error.response?.data?.error || error.message;
-    res.send("❌ Ошибка при создании клиента: " + err);
-  }
-});
-
-// ✅ Обновление клиента
-app.post("/update-client", async (req, res) => {
-  const { client_id, name, emails, phone, note } = req.body;
-
-  try {
-    await axios.post("https://api.usedesk.ru/update/client", {
-      api_token: process.env.API_TOKEN,
-      client_id,
-      name,
-      emails: emails ? [emails] : [],
-      phone: phone?.replace(/[^0-9]/g, "").replace(/^8/, "7"),
-      note,
-      is_new_note: "true"
-    });
-
-    res.send("✅ Клиент обновлён");
-  } catch (error) {
-    const err = error.response?.data?.error || error.message;
-    res.send("❌ Ошибка при обновлении клиента: " + err);
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
-});
+  </script>
+</body>
+</html>
