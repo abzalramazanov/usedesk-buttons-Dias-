@@ -109,15 +109,20 @@ app.post("/update-client", async (req, res) => {
   }
 });
 
-// ✅ Поиск клиента
+// ✅ Поиск клиента (исправленный)
 app.post("/search-client", async (req, res) => {
-  const { query, search_type } = req.body;
+  let { query } = req.body;
+
+  // Автоочистка и приведение к строке
+  query = String(query || "").replace(/[^0-9]/g, "");
+
+  console.log("🔍 Поиск клиента по:", query);
 
   try {
     const response = await axios.post("https://api.usedesk.ru/clients", {
       api_token: process.env.API_TOKEN,
       query,
-      search_type
+      search_type: "partial_match" // 🔑 вот это важно!
     });
 
     const clients = response.data.clients;
@@ -126,10 +131,10 @@ app.post("/search-client", async (req, res) => {
     }
 
     const list = clients.map(c =>
-      `ID: ${c.id}, Имя: ${c.name || "-"}, Email: ${c.emails?.join(", ") || "-"}, Тел: ${c.phone || "-"}`
+      `ID: ${c.id}<br>Имя: ${c.name || "-"}<br>Email: ${c.emails?.join(", ") || "-"}<br>Тел: ${c.phone || "-"}<br><br>`
     );
 
-    res.send("🔍 Найдено:<br>" + list.join("<br>"));
+    res.send("🔍 Найдено:<br><br>" + list.join(""));
   } catch (error) {
     const err = error.response?.data?.error || error.message;
     res.send("❌ Ошибка при поиске: " + err);
