@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 // ✅ Создание тикета
 app.post("/create-ticket", async (req, res) => {
-  const { subject, message, client_phone, tag, user_id, status } = req.body;
+  const { subject, message, client_phone, tag, user_id, status, message_type } = req.body;
 
   if (!subject || !message) {
     return res.send("❌ Subject и Message обязательны");
@@ -28,7 +28,7 @@ app.post("/create-ticket", async (req, res) => {
 
   for (const phone of phones) {
     try {
-      const response = await axios.post("https://api.usedesk.ru/create/ticket", {
+      const payload = {
         api_token: process.env.API_TOKEN,
         subject,
         message,
@@ -36,12 +36,19 @@ app.post("/create-ticket", async (req, res) => {
         channel_id: 66235,
         from: "user",
         status: Number(status),
-        tag
-      });
+        tag,
+        user_id: Number(user_id)
+      };
 
-const ticket_id = response.data.ticket_id || response.data.ticket?.id;
-const ticketLink = `<a href="https://secure.usedesk.ru/tickets/${ticket_id}" target="_blank">${ticket_id}</a>`;
-results.push(`✅ ${phone}: тикет ID ${ticketLink}`);
+      if (message_type === "private") {
+        payload.private_comment = "true";
+      }
+
+      const response = await axios.post("https://api.usedesk.ru/create/ticket", payload);
+
+      const ticket_id = response.data.ticket_id || response.data.ticket?.id;
+      const ticketLink = `<a href="https://secure.usedesk.ru/tickets/${ticket_id}" target="_blank">${ticket_id}</a>`;
+      results.push(`✅ ${phone}: тикет ID ${ticketLink}`);
     } catch (error) {
       const err = error.response?.data?.error || error.message;
       results.push(`❌ ${phone}: ошибка — ${err}`);
@@ -50,6 +57,7 @@ results.push(`✅ ${phone}: тикет ID ${ticketLink}`);
 
   res.send(results.join("<br>"));
 });
+
 
 // ✅ Создание клиента
 app.post("/create-client", async (req, res) => {
