@@ -58,9 +58,9 @@ app.post("/create-ticket", async (req, res) => {
 
 // ✅ Поиск клиента
 app.post("/search-client", async (req, res) => {
-let { query } = req.body;
-query = String(query || "").replace(/[^0-9]/g, "").replace(/^8/, "7");
-console.log("🔍 Поиск по:", query); // 👈 ОБЯЗАТЕЛЬНО
+  let { query } = req.body;
+  query = String(query || "").replace(/[^0-9]/g, "").replace(/^8/, "7");
+  console.log("🔍 Поиск по:", query); // 👈 ОБЯЗАТЕЛЬНО
 
   try {
     const response = await axios.post("https://api.usedesk.ru/clients", {
@@ -69,7 +69,10 @@ console.log("🔍 Поиск по:", query); // 👈 ОБЯЗАТЕЛЬНО
       search_type: "partial_match"
     });
 
-    const clients = response.data.clients;
+    const data = response.data;
+    console.log("🧾 Ответ от UseDesk:", data);
+
+    const clients = data.clients || data;
     if (!clients || clients.length === 0) {
       return res.send("⚠️ Ничего не найдено");
     }
@@ -83,12 +86,20 @@ console.log("🔍 Поиск по:", query); // 👈 ОБЯЗАТЕЛЬНО
         <div style="margin-bottom: 20px;">
           <a href="${clientLink}" target="_blank">ID: ${c.id}</a><br>
           Имя: ${c.name || "-"}<br>
-          Email: ${c.emails?.join(", ") || "-"}<br>
+          Email: ${Array.isArray(c.emails) ? c.emails.join(", ") : "-"}<br>
           Тел: ${c.phone || "-"}<br>
           Тикеты: ${tickets}
         </div>
       `;
     });
+
+    res.send("🔍 Найдено:<br><br>" + list.join(""));
+  } catch (error) {
+    const err = error.response?.data?.error || error.message;
+    res.send("❌ Ошибка при поиске: " + err);
+  }
+});
+
 
     res.send("🔍 Найдено:<br><br>" + list.join(""));
   } catch (error) {
