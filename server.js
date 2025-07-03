@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(express.static("."));
+app.use('/images', express.static(__dirname + '/images')); // ✅ для отдачи картинок fuck / no_fuck
 
 // ✅ Создание тикета
 app.post("/create-ticket", async (req, res) => {
