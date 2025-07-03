@@ -39,8 +39,9 @@ app.post("/create-ticket", async (req, res) => {
         tag
       });
 
-      const ticket_id = response.data.ticket_id || response.data.ticket?.id;
-      results.push(`✅ ${phone}: тикет ID ${ticket_id}`);
+const ticket_id = response.data.ticket_id || response.data.ticket?.id;
+const ticketLink = `<a href="https://secure.usedesk.ru/tickets/${ticket_id}" target="_blank">${ticket_id}</a>`;
+results.push(`✅ ${phone}: тикет ID ${ticketLink}`);
     } catch (error) {
       const err = error.response?.data?.error || error.message;
       results.push(`❌ ${phone}: ошибка — ${err}`);
