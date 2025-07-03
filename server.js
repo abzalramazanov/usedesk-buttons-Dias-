@@ -66,11 +66,13 @@ app.post("/create-client", async (req, res) => {
     const clientId = response.data.client_id || response.data.client?.id;
 
     if (clientId) {
-      res.send(`✅ Клиент создан! ID: ${clientId}<br>
-        Имя: ${name || "-"}<br>
-        Email: ${emails || "-"}<br>
-        Телефон: ${phone || "-"}<br>
-        Заметки: ${note || "-"}`);
+const clientLink = `<a href="https://secure.usedesk.ru/clients/details/${clientId}" target="_blank">${clientId}</a>`;
+
+res.send(`✅ Клиент создан! ID: ${clientLink}<br>
+  Имя: ${name || "-"}<br>
+  Email: ${emails || "-"}<br>
+  Телефон: ${phone || "-"}<br>
+  Заметки: ${note || "-"}`);
     } else {
       res.send("⚠️ Клиент создан, но ID не получен.");
     }
