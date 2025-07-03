@@ -258,24 +258,22 @@
       setResult('responseMessage', text);
     });
 
-document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const data = Object.fromEntries(formData.entries());
+    document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      data.search_type = "partial_match";
+      console.log("🔍 Отправка поиска клиента", data);
 
-  // 👇 Обязательно указываем тип поиска
-  data.search_type = "partial_match";
-
-  showSpinner('responseMessage', 'Поиск клиента...');
-  const res = await fetch('/search-client', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  const text = await res.text();
-  setResult('responseMessage', text);
-});
-
+      showSpinner('responseMessage', 'Поиск клиента...');
+      const res = await fetch('/search-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const text = await res.text();
+      setResult('responseMessage', text);
+    });
 
     document.getElementById('createClientForm').addEventListener('submit', async function(e) {
       e.preventDefault();
