@@ -127,16 +127,19 @@
     }
 
     .client-result {
-      background: var(--primary);
-      color: white;
+      background: var(--success-bg);
+      color: var(--text-color);
       padding: 20px;
       margin-top: 20px;
       border-radius: 12px;
-      font-size: 14px;
+      font-size: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      word-break: break-word;
     }
 
     .client-result a {
-      color: white;
+      color: var(--primary);
     }
   </style>
 </head>
@@ -209,19 +212,20 @@
       });
       const text = await res.text();
 
-      // преобразуем, если html содержит строки ID, Имя и Тикеты
       const match = text.match(/ID: (\d+)<br>Имя: (.*?)<br>Email: (.*?)<br>Тел: (.*?)<br>Тикеты: (.*)/);
       if (match) {
         const [, id, name, email, phone, ticketsRaw] = match;
         const tickets = ticketsRaw.match(/\d+/g) || [];
         const formatted = `
         <div class="client-result">
-          🔍 Найдено:<br><br>
           <strong>ID:</strong> <a href="https://secure.usedesk.ru/clients/details/${id}" target="_blank">${id}</a><br>
           <strong>Имя:</strong> ${name}<br>
           <strong>Email:</strong> ${email}<br>
           <strong>Тел:</strong> ${phone}<br>
-          <strong>Тикеты:</strong> ${tickets.map(t => `<a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a>`).join(', ')}
+          <strong>Тикеты:</strong><br>
+          <ul style="padding-left: 20px;">
+            ${tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join('')}
+          </ul>
         </div>`;
         setResult('responseMessage', formatted);
       } else {
