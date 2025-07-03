@@ -139,11 +139,25 @@
       overflow-y: auto;
       box-shadow: var(--result-shadow);
     }
+
+    #reactionImageContainer {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    #reactionImage {
+      max-height: 300px;
+      transition: opacity 0.3s ease;
+    }
   </style>
 </head>
 <body>
   <button class="theme-toggle" onclick="toggleTheme()" title="Переключить тему">🌙</button>
   <h2>UseDesk Панель инструментов</h2>
+
+  <div id="reactionImageContainer">
+    <img id="reactionImage" src="/images/no_fuck.png" alt="reaction" />
+  </div>
 
   <button onclick="showBlock('ticketForm')">📩 Создать тикет</button>
   <button onclick="showBlock('clientSearchForm')">🔍 Найти клиента</button>
@@ -222,25 +236,19 @@
   <div id="responseMessage"></div>
 
   <script>
-    function normalizePhone(raw) {
-      const cleaned = raw.replace(/[^0-9]/g, '');
-      if (cleaned.length < 11) return null;
-      return cleaned.replace(/^8/, '7').replace(/^\+7/, '7');
+    function showMiddleFinger() {
+      const img = document.getElementById('reactionImage');
+      img.src = '/images/fuck.png';
+      setTimeout(() => {
+        img.src = '/images/no_fuck.png';
+      }, 2000);
     }
 
-    function showSpinner(elementId, text = "Загрузка...") {
-      const el = document.getElementById(elementId);
-      if (el) {
-        el.innerHTML = `<span style='color:var(--text-color);'>⏳ ${text}</span>`;
-      }
-    }
-
-    function setResult(elementId, html) {
-      const el = document.getElementById(elementId);
-      if (el) {
-        el.innerHTML = html;
-      }
-    }
+    document.querySelectorAll("form").forEach(form => {
+      form.addEventListener('submit', () => {
+        showMiddleFinger();
+      });
+    });
 
     function toggleTheme() {
       const body = document.body;
@@ -254,100 +262,6 @@
       document.querySelectorAll('form').forEach(f => f.style.display = 'none');
       document.getElementById(id).style.display = 'block';
     }
-
-    window.onload = () => {
-      const theme = localStorage.getItem('theme');
-      if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
-        document.querySelector('.theme-toggle').textContent = '☀️';
-      }
-    }
-
-    document.getElementById('ticketForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      if (data.client_phone) {
-        const phones = data.client_phone.split(',').map(normalizePhone).filter(Boolean);
-        if (!phones.length) return alert("❗ Введите хотя бы один корректный номер телефона (11 цифр)");
-        data.client_phone = phones.join(',');
-      }
-      showSpinner('responseMessage', 'Создание тикета...');
-      const res = await fetch('/create-ticket', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const text = await res.text();
-      setResult('responseMessage', `<div class="response-box success">${text}</div>`);
-    });
-
-    document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      data.query = normalizePhone(data.query) || data.query;
-      data.search_type = "partial_match";
-      showSpinner('responseMessage', 'Поиск клиента...');
-      const res = await fetch('/search-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const result = await res.json();
-      if (result.error) {
-        setResult('responseMessage', `<div class="response-box error">❌ ${result.error}</div>`);
-        return;
-      }
-      const clients = result.clients;
-      const html = clients.map(c => `
-        <div class="client-result">
-          <strong>ID:</strong> <a href="https://secure.usedesk.ru/clients/details/${c.id}" target="_blank">${c.id}</a><br>
-          <strong>Имя:</strong> ${c.name}<br>
-          <strong>Email:</strong> ${c.email}<br>
-          <strong>Тел:</strong> ${c.phone}<br>
-          <strong>Тикеты:</strong>
-          <ul>
-            ${c.tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join('')}
-          </ul>
-        </div>
-      `).join('');
-      setResult('responseMessage', html);
-    });
-
-    document.getElementById('createClientForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      if (data.phone) {
-        const phone = normalizePhone(data.phone);
-        if (!phone) return alert("❗ Введите корректный номер телефона (11 цифр)");
-        data.phone = phone;
-      }
-      showSpinner('responseMessage', 'Создание клиента...');
-      const res = await fetch('/create-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const text = await res.text();
-      setResult('responseMessage', `<div class="response-box success">${text}</div>`);
-    });
-
-    document.getElementById('updateClientForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      if (data.phone) {
-        const phone = normalizePhone(data.phone);
-        if (!phone) return alert("❗ Введите корректный номер телефона (11 цифр)");
-        data.phone = phone;
-      }
-      showSpinner('responseMessage', 'Обновление клиента...');
-      const res = await fetch('/update-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const text = await res.text();
-      setResult('responseMessage', `<div class="response-box success">${text}</div>`);
-    });
   </script>
 </body>
 </html>
