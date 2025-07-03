@@ -111,11 +111,10 @@ app.post("/update-client", async (req, res) => {
   }
 });
 
-// ✅ Поиск клиента
+// ✅ Поиск клиента (табличный вывод)
 app.post("/search-client", async (req, res) => {
   let { query } = req.body;
-
-  query = String(query || "").replace(/[^0-9]/g, ""); // чистим от лишнего
+  query = String(query || "").replace(/[^0-9]/g, "");
 
   try {
     const response = await axios.post("https://api.usedesk.ru/clients", {
@@ -124,16 +123,32 @@ app.post("/search-client", async (req, res) => {
       search_type: "partial_match"
     });
 
-    const clients = response.data.clients;
+    let clients = response.data.clients;
+    if (!clients && Array.isArray(response.data)) {
+      clients = response.data;
+    }
+
     if (!clients || clients.length === 0) {
       return res.send("⚠️ Ничего не найдено");
     }
 
-    const list = clients.map(c =>
-      `ID: ${c.id}<br>Имя: ${c.name || "-"}<br>Email: ${c.emails?.join(", ") || "-"}<br>Тел: ${c.phone || "-"}<br><br>`
-    );
+    const tableHTML = clients.map(c => {
+      const ticketList = c.tickets?.length
+        ? `<ul style="margin:0; padding-left:20px; max-height:150px; overflow-y:auto;">${c.tickets.map(t => `<li>${t}</li>`).join("")}</ul>`
+        : "-";
 
-    res.send("🔍 Найдено:<br><br>" + list.join(""));
+      return `
+        <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px; border-collapse: collapse; width: 100%; max-width: 700px;">
+          <tr><th style="text-align:left;">ID</th><td>${c.id}</td></tr>
+          <tr><th style="text-align:left;">Имя</th><td>${c.name || "-"}</td></tr>
+          <tr><th style="text-align:left;">Телефон</th><td>${c.phone || "-"}</td></tr>
+          <tr><th style="text-align:left;">Email</th><td>${(c.emails && c.emails.join(", ")) || "-"}</td></tr>
+          <tr><th style="text-align:left;">Тикеты</th><td>${ticketList}</td></tr>
+        </table>
+      `;
+    }).join("");
+
+    res.send(`<div>🔍 Найдено клиентов: ${clients.length}</div><br>${tableHTML}`);
   } catch (error) {
     const err = error.response?.data?.error || error.message;
     res.send("❌ Ошибка при поиске: " + err);
