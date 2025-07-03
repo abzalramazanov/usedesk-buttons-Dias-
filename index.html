@@ -140,12 +140,78 @@
   <button class="theme-toggle" onclick="toggleTheme()" title="Переключить тему">🌙</button>
   <h2>UseDesk Панель инструментов</h2>
 
+  <button onclick="showBlock('ticketForm')">📩 Создать тикет</button>
   <button onclick="showBlock('clientSearchForm')">🔍 Найти клиента</button>
+  <button onclick="showBlock('createClientForm')">👤 Создать клиента</button>
+  <button onclick="showBlock('updateClientForm')">🛠 Обновить клиента</button>
 
-  <form id="clientSearchForm" style="display:block">
+  <form id="ticketForm" style="display:none">
+    <label>Subject*</label>
+    <input type="text" name="subject" required>
+
+    <label>Message*</label>
+    <textarea name="message" rows="4" required></textarea>
+
+    <label>Client Phone (через запятую):</label>
+    <input type="text" name="client_phone">
+
+    <label>Tag (не обязат.):</label>
+    <input type="text" name="tag">
+
+    <label>Назначить на:</label>
+    <select name="user_id">
+      <option value="293758">Superuser</option>
+      <option value="293880">Диас</option>
+      <option value="294126">Дархан</option>
+    </select>
+
+    <label>Тип сообщения:</label>
+    <select name="message_type">
+      <option value="public">Публичный</option>
+      <option value="private">Комментарии</option>
+    </select>
+
+    <label>Статус тикета:</label>
+    <select name="status">
+      <option value="2">Выполнен</option>
+      <option value="3">Закрыт</option>
+      <option value="6">В ожидании</option>
+      <option value="9">Рассылка</option>
+    </select>
+
+    <button type="submit">Создать тикет</button>
+  </form>
+
+  <form id="clientSearchForm" style="display:none">
     <label>Номер телефона или имя:</label>
     <input type="text" name="query" required>
     <button type="submit">Найти клиента</button>
+  </form>
+
+  <form id="createClientForm" style="display:none">
+    <label>Имя:</label>
+    <input type="text" name="name">
+    <label>Email:</label>
+    <input type="email" name="emails">
+    <label>Телефон:</label>
+    <input type="text" name="phone">
+    <label>Заметка:</label>
+    <input type="text" name="note">
+    <button type="submit">Создать клиента</button>
+  </form>
+
+  <form id="updateClientForm" style="display:none">
+    <label>ID клиента:</label>
+    <input type="text" name="client_id">
+    <label>Новое имя:</label>
+    <input type="text" name="name">
+    <label>Новый email:</label>
+    <input type="email" name="emails">
+    <label>Новый телефон:</label>
+    <input type="text" name="phone">
+    <label>Заметка:</label>
+    <input type="text" name="note">
+    <button type="submit">Обновить клиента</button>
   </form>
 
   <div id="responseMessage"></div>
@@ -186,12 +252,22 @@
       }
     }
 
+    document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      showSpinner('responseMessage', 'Создание тикета...');
+      const res = await fetch('/create-ticket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const text = await res.text();
+      setResult('responseMessage', `<div class="response-box success">${text}</div>`);
+    });
+
     document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
-      data.search_type = "partial_match";
-
+      const data = Object.fromEntries(new FormData(this));
       showSpinner('responseMessage', 'Поиск клиента...');
       const res = await fetch('/search-client', {
         method: 'POST',
@@ -205,8 +281,7 @@
         return;
       }
 
-      const clients = result.clients;
-      const html = clients.map(c => `
+      const html = result.clients.map(c => `
         <div class="client-result">
           <strong>ID:</strong> <a href="https://secure.usedesk.ru/clients/details/${c.id}" target="_blank">${c.id}</a><br>
           <strong>Имя:</strong> ${c.name}<br>
@@ -220,6 +295,32 @@
       `).join('');
 
       setResult('responseMessage', html);
+    });
+
+    document.getElementById('createClientForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      showSpinner('responseMessage', 'Создание клиента...');
+      const res = await fetch('/create-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const text = await res.text();
+      setResult('responseMessage', `<div class="response-box success">${text}</div>`);
+    });
+
+    document.getElementById('updateClientForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      showSpinner('responseMessage', 'Обновление клиента...');
+      const res = await fetch('/update-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const text = await res.text();
+      setResult('responseMessage', `<div class="response-box success">${text}</div>`);
     });
   </script>
 </body>
