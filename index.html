@@ -238,11 +238,80 @@
       }, 3000);
     }
 
+    function normalizePhone(raw) {
+      const cleaned = raw.replace(/[^0-9]/g, '');
+      if (cleaned.length < 11) return null;
+      return cleaned.replace(/^8/, '7').replace(/^\+7/, '7');
+    }
+
     document.querySelectorAll("form").forEach(form => {
-      form.addEventListener('submit', () => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
         showMiddleFinger();
+
+        const data = Object.fromEntries(new FormData(form));
+        const formId = form.id;
+        let path = '';
+
+        if (formId === 'ticketForm') {
+          if (data.client_phone) {
+            const phones = data.client_phone.split(',').map(normalizePhone).filter(Boolean);
+            if (!phones.length) return alert("❗ Введите хотя бы один корректный номер телефона (11 цифр)");
+            data.client_phone = phones.join(',');
+          }
+          path = '/create-ticket';
+        } else if (formId === 'clientSearchForm') {
+          data.query = normalizePhone(data.query) || data.query;
+          data.search_type = "partial_match";
+          path = '/search-client';
+        } else if (formId === 'createClientForm') {
+          if (data.phone) {
+            const phone = normalizePhone(data.phone);
+            if (!phone) return alert("❗ Введите корректный номер телефона (11 цифр)");
+            data.phone = phone;
+          }
+          path = '/create-client';
+        } else if (formId === 'updateClientForm') {
+          if (data.phone) {
+            const phone = normalizePhone(data.phone);
+            if (!phone) return alert("❗ Введите корректный номер телефона (11 цифр)");
+            data.phone = phone;
+          }
+          path = '/update-client';
+        }
+
+        const res = await fetch(path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const json = await res.json();
+          if (json.error) {
+            document.getElementById("responseMessage").innerHTML = `<div class="response-box error">❌ ${json.error}</div>`;
+            return;
+          }
+          const html = json.clients.map(c => `
+            <div class="client-result">
+              <strong>ID:</strong> <a href="https://secure.usedesk.ru/clients/details/${c.id}" target="_blank">${c.id}</a><br>
+              <strong>Имя:</strong> ${c.name}<br>
+              <strong>Email:</strong> ${c.email}<br>
+              <strong>Тел:</strong> ${c.phone}<br>
+              <strong>Тикеты:</strong>
+              <ul>
+                ${c.tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join('')}
+              </ul>
+            </div>
+          `).join('');
+          document.getElementById("responseMessage").innerHTML = html;
+        } else {
+          const text = await res.text();
+          document.getElementById("responseMessage").innerHTML = `<div class="response-box success">${text}</div>`;
+        }
       });
     });
   </script>
 </body>
-</html>
+</html> 
