@@ -144,22 +144,30 @@ app.post("/search-client", async (req, res) => {
       return res.send("⚠️ Ничего не найдено");
     }
 
-    const tableHTML = clients.map(c => {
-      const emailStr = Array.isArray(c.emails) ? c.emails.join(", ") : "-";
-      const ticketList = Array.isArray(c.tickets) && c.tickets.length
-        ? `<ul style="margin:0; padding-left:20px;">${c.tickets.map(t => `<li>${t}</li>`).join("")}</ul>`
-        : "-";
+const tableHTML = clients.map(c => {
+  const emailStr = Array.isArray(c.emails) ? c.emails.join(", ") : "-";
 
-      return `
-        <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px; border-collapse: collapse; width: 100%; max-width: 700px;">
-          <tr><th>ID</th><td>${c.id}</td></tr>
-          <tr><th>Имя</th><td>${c.name || "-"}</td></tr>
-          <tr><th>Телефон</th><td>${c.phone || "-"}</td></tr>
-          <tr><th>Email</th><td>${emailStr}</td></tr>
-          <tr><th>Тикеты</th><td>${ticketList}</td></tr>
-        </table>
-      `;
-    }).join("");
+  const ticketList = Array.isArray(c.tickets) && c.tickets.length
+    ? `<div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
+         <ul style="margin:0; padding-left:20px;">
+           ${c.tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join("")}
+         </ul>
+       </div>`
+    : "-";
+
+  const clientLink = `<a href="https://secure.usedesk.ru/clients/details/${c.id}" target="_blank">${c.id}</a>`;
+
+  return `
+    <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px; border-collapse: collapse; width: 100%; max-width: 700px;">
+      <tr><th>ID</th><td>${clientLink}</td></tr>
+      <tr><th>Имя</th><td>${c.name || "-"}</td></tr>
+      <tr><th>Телефон</th><td>${c.phone || "-"}</td></tr>
+      <tr><th>Email</th><td>${emailStr}</td></tr>
+      <tr><th>Тикеты</th><td>${ticketList}</td></tr>
+    </table>
+  `;
+}).join("");
+
 
     res.send(`<div>🔍 Найдено клиентов: ${clients.length}</div><br>${tableHTML}`);
   } catch (error) {
