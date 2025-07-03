@@ -167,11 +167,40 @@
   <h2>UseDesk Панель инструментов</h2>
 
   <button onclick="showBlock('clientSearchForm')">🔍 Найти клиента</button>
+  <button onclick="showBlock('createClientForm')">➕ Создать клиента</button>
+  <button onclick="showBlock('updateClientForm')">✏️ Обновить клиента</button>
+  <button onclick="showBlock('createTicketForm')">📩 Создать тикет</button>
 
   <form id="clientSearchForm" style="display:block">
     <label>Номер телефона или имя:</label>
     <input type="text" name="query" required>
     <button type="submit">Найти клиента</button>
+  </form>
+
+  <form id="createClientForm" style="display:none">
+    <label>Имя клиента:</label>
+    <input type="text" name="name" required>
+    <label>Телефон:</label>
+    <input type="text" name="phone" required>
+    <button type="submit">Создать клиента</button>
+  </form>
+
+  <form id="updateClientForm" style="display:none">
+    <label>ID клиента:</label>
+    <input type="text" name="client_id" required>
+    <label>Новое имя:</label>
+    <input type="text" name="name" required>
+    <button type="submit">Обновить клиента</button>
+  </form>
+
+  <form id="createTicketForm" style="display:none">
+    <label>Тема:</label>
+    <input type="text" name="subject" required>
+    <label>Сообщение:</label>
+    <textarea name="message" required></textarea>
+    <label>Телефон клиента:</label>
+    <input type="text" name="client_phone" required>
+    <button type="submit">Создать тикет</button>
   </form>
 
   <div id="responseMessage"></div>
@@ -248,6 +277,51 @@
       `).join('');
 
       setResult('responseMessage', html);
+    });
+
+    document.getElementById('createClientForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      showSpinner('responseMessage', 'Создание клиента...');
+      const res = await fetch('/create-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      setResult('responseMessage', `<div class="response-box ${result.error ? 'error' : 'success'}">${result.message}</div>`);
+    });
+
+    document.getElementById('updateClientForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      showSpinner('responseMessage', 'Обновление клиента...');
+      const res = await fetch('/update-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      setResult('responseMessage', `<div class="response-box ${result.error ? 'error' : 'success'}">${result.message}</div>`);
+    });
+
+    document.getElementById('createTicketForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      showSpinner('responseMessage', 'Создание тикета...');
+      const res = await fetch('/create-ticket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      setResult('responseMessage', `<div class="response-box ${result.error ? 'error' : 'success'}">${result.message}</div>`);
     });
   </script>
 </body>
