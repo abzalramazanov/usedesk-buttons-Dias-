@@ -22,7 +22,7 @@
       <label>Message*:</label><br><textarea name="message" rows="4" cols="50" required></textarea><br><br>
       <label>Client Phone (через запятую):</label><br><input type="text" name="client_phone"><br><br>
       <label>Tag (не обязат.):</label><br><input type="text" name="tag"><br><br>
-      <label>User ID (можно менять):</label><br><input type="text" name="user_id" value="293880"><br><br>
+      <label>User ID:</label><br><input type="text" name="user_id" value="293880"><br><br>
       <label>Статус тикета:</label><br>
       <select name="status">
         <option value="2">Выполнен</option>
@@ -83,68 +83,48 @@
 
     document.getElementById('ticketForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
-
+      const data = Object.fromEntries(new FormData(this));
       const res = await fetch('/create-ticket', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-
-      const text = await res.text();
-      document.getElementById('responseMessage').innerHTML = text;
+      document.getElementById('responseMessage').innerHTML = await res.text();
     });
 
     document.getElementById('clientForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
-
+      const data = Object.fromEntries(new FormData(this));
       const res = await fetch('/create-client', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-
-      const text = await res.text();
-      document.getElementById('clientResponse').innerText = text;
+      document.getElementById('clientResponse').innerText = await res.text();
     });
 
     document.getElementById('updateForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
+      const data = Object.fromEntries(new FormData(this));
       data.is_new_note = "true";
-
       const res = await fetch('/update-client', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-
-      const text = await res.text();
-      document.getElementById('updateResponse').innerText = text;
+      document.getElementById('updateResponse').innerText = await res.text();
     });
 
-document.getElementById('searchForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const data = Object.fromEntries(formData.entries());
-  data.search_type = "partial_match";
-
-  const res = await fetch('/search-client', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(data)
-  });
-
-  const text = await res.text();
-  document.getElementById('searchResponse').innerHTML = text; // вот тут был косяк
-});
-
-      const text = await res.text();
-      document.getElementById('searchResponse').innerText = text;
+    document.getElementById('searchForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      data.search_type = "partial_match";
+      const res = await fetch('/search-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      document.getElementById('searchResponse').innerHTML = await res.text(); // ✅ FIXED
     });
   </script>
 </body>
