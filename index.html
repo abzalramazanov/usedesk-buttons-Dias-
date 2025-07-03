@@ -134,6 +134,17 @@
       border-radius: 12px;
       font-size: 14px;
     }
+
+    .ticket-list {
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 10px;
+      margin-top: 4px;
+    }
+
+    .ticket-list li {
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
@@ -213,9 +224,11 @@
           <strong>Email:</strong> ${c.email}<br>
           <strong>Тел:</strong> ${c.phone}<br>
           <strong>Тикеты:</strong>
-          <ul>
-            ${c.tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join('')}
-          </ul>
+          <div class="ticket-list">
+            <ul>
+              ${c.tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join('')}
+            </ul>
+          </div>
         </div>
       `).join('');
 
