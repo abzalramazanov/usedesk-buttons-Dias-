@@ -60,7 +60,7 @@ app.post("/create-ticket", async (req, res) => {
 app.post("/search-client", async (req, res) => {
   let { query } = req.body;
   query = String(query || "").replace(/[^0-9]/g, "").replace(/^8/, "7");
-  console.log("🔍 Поиск по:", query); // 👈 ОБЯЗАТЕЛЬНО
+  console.log("🔍 Поиск по:", query);
 
   try {
     const response = await axios.post("https://api.usedesk.ru/clients", {
@@ -69,10 +69,8 @@ app.post("/search-client", async (req, res) => {
       search_type: "partial_match"
     });
 
-    const data = response.data;
-    console.log("🧾 Ответ от UseDesk:", data);
+    const clients = Array.isArray(response.data) ? response.data : response.data.clients;
 
-    const clients = data.clients || data;
     if (!clients || clients.length === 0) {
       return res.send("⚠️ Ничего не найдено");
     }
