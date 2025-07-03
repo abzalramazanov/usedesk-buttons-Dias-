@@ -3,130 +3,185 @@
 <head>
   <meta charset="UTF-8">
   <title>UseDesk Tools</title>
-
-  <!-- 💫 Стили для спиннера -->
   <style>
-    .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #ccc;
-      border-top: 2px solid #333;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      vertical-align: middle;
-      margin-right: 8px;
+    :root {
+      --bg-color: #f5f5f7;
+      --text-color: #1d1d1f;
+      --form-bg: #fff;
+      --border-color: #d2d2d7;
+      --primary: #0071e3;
+      --primary-hover: #005bb5;
+      --success-bg: #e7f1ff;
+      --success-color: #0071e3;
+      --error-bg: #fff3f3;
+      --error-color: #d93025;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    body.dark-mode {
+      --bg-color: #1d1d1f;
+      --text-color: #f5f5f7;
+      --form-bg: #2c2c2e;
+      --border-color: #3a3a3c;
+      --primary: #0a84ff;
+      --primary-hover: #0060df;
+      --success-bg: #1e3a5f;
+      --success-color: #0a84ff;
+      --error-bg: #3f2b2b;
+      --error-color: #ff453a;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-color);
+      margin: 0;
+      padding: 40px;
+      color: var(--text-color);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 30px;
+    }
+
+    button, select, input, textarea {
+      font-size: 16px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--form-bg);
+      color: var(--text-color);
+      transition: all 0.2s ease;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    form {
+      background: var(--form-bg);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      max-width: 640px;
+      transition: background 0.3s;
+    }
+
+    label {
+      font-weight: 500;
+      display: block;
+      margin: 12px 0 4px;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    .response-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .response-box.success {
+      background: var(--success-bg);
+      color: var(--success-color);
+      border-left: 5px solid var(--success-color);
+    }
+
+    .response-box.error {
+      background: var(--error-bg);
+      color: var(--error-color);
+      border-left: 5px solid var(--error-color);
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
   <h2>UseDesk Панель инструментов</h2>
+  <form id="ticketForm">
+    <label>Subject*</label>
+    <input type="text" name="subject" required>
 
-  <button onclick="showForm('ticketFormBlock')">📩 Создать тикет</button>
-  <button onclick="showForm('clientFormBlock')">👤 Создать клиента</button>
-  <button onclick="showForm('updateClientBlock')">🛠️ Обновить клиента</button>
-  <button onclick="showForm('sendMessageBlock')">📨 Отправить сообщение</button>
-  <button onclick="showForm('searchClientBlock')">🔍 Поиск клиента</button>
+    <label>Message*</label>
+    <textarea name="message" rows="4" required></textarea>
 
-  <hr>
+    <label>Client Phone (через запятую):</label>
+    <input type="text" name="client_phone">
 
-  <div id="ticketFormBlock">
-    <h3>Создание тикета</h3>
-    <form id="ticketForm">
-      <label>Subject*:</label><br><input type="text" name="subject" required><br><br>
-      <label>Message*:</label><br><textarea name="message" rows="4" cols="50" required></textarea><br><br>
-      <label>Client Phone (через запятую):</label><br><input type="text" name="client_phone"><br><br>
-      <label>Tag (не обязат.):</label><br><input type="text" name="tag"><br><br>
+    <label>Tag (не обязат.):</label>
+    <input type="text" name="tag">
 
-      <label>Назначить на:</label><br>
-      <select name="user_id">
-        <option value="293758">Superuser</option>
-        <option value="293880">Диас</option>
-        <option value="294126">Дархан</option>
-      </select><br><br>
+    <label>Назначить на:</label>
+    <select name="user_id">
+      <option value="293758">Superuser</option>
+      <option value="293880">Диас</option>
+      <option value="294126">Дархан</option>
+    </select>
 
-      <label>Тип сообщения:</label><br>
-      <select name="message_type">
-        <option value="public">Публичный</option>
-        <option value="private">Комментарии</option>
-      </select><br><br>
+    <label>Тип сообщения:</label>
+    <select name="message_type">
+      <option value="public">Публичный</option>
+      <option value="private">Комментарии</option>
+    </select>
 
-      <label>Статус тикета:</label><br>
-      <select name="status">
-        <option value="2">Выполнен</option>
-        <option value="3">Закрыт</option>
-        <option value="6">В ожидании</option>
-        <option value="9">Рассылка</option>
-      </select><br><br>
+    <label>Статус тикета:</label>
+    <select name="status">
+      <option value="2">Выполнен</option>
+      <option value="3">Закрыт</option>
+      <option value="6">В ожидании</option>
+      <option value="9">Рассылка</option>
+    </select>
 
-      <button type="submit">Создать тикет</button>
-    </form>
-    <p id="responseMessage" style="font-weight: bold;"></p>
-  </div>
+    <button type="submit">Создать тикет</button>
+  </form>
 
-  <div id="clientFormBlock" style="display:none;">
-    <h3>Создание клиента</h3>
-    <form id="clientForm">
-      <label>Имя:</label><br><input type="text" name="name"><br><br>
-      <label>Email:</label><br><input type="email" name="emails"><br><br>
-      <label>Заметки:</label><br><input type="text" name="note"><br><br>
-      <label>Телефон:</label><br><input type="text" name="phone"><br><br>
-      <button type="submit">Создать клиента</button>
-    </form>
-    <p id="clientResponse" style="font-weight: bold;"></p>
-  </div>
-
-  <div id="updateClientBlock" style="display:none;">
-    <h3>Обновление клиента</h3>
-    <form id="updateForm">
-      <label>ID клиента:</label><br><input type="text" name="client_id"><br><br>
-      <label>Новое имя:</label><br><input type="text" name="name"><br><br>
-      <label>Новый email:</label><br><input type="email" name="emails"><br><br>
-      <label>Новая позиция:</label><br><input type="text" name="position"><br><br>
-      <label>Новая заметка:</label><br><input type="text" name="note"><br><br>
-      <button type="submit">Обновить клиента</button>
-    </form>
-    <p id="updateResponse" style="font-weight: bold;"></p>
-  </div>
-
-  <div id="sendMessageBlock" style="display:none;">
-    <h3>Отправка сообщения</h3>
-    <p>📬 Здесь будет форма для отправки произвольного сообщения</p>
-  </div>
-
-  <div id="searchClientBlock" style="display:none;">
-    <h3>Поиск клиента</h3>
-    <form id="searchForm">
-      <label>Имя или номер телефона:</label><br><input type="text" name="query"><br><br>
-      <button type="submit">Найти клиента</button>
-    </form>
-    <div id="searchResponse" style="font-weight: bold; margin-top:20px;"></div>
-  </div>
+  <div id="responseMessage"></div>
 
   <script>
-    function showForm(formId) {
-      const forms = ['ticketFormBlock', 'clientFormBlock', 'updateClientBlock', 'sendMessageBlock', 'searchClientBlock'];
-      forms.forEach(f => document.getElementById(f).style.display = 'none');
-      document.getElementById(formId).style.display = 'block';
-    }
-
-    // 🔄 Показ спиннера
     function showSpinner(elementId, text = "Загрузка...") {
       const el = document.getElementById(elementId);
       if (el) {
-        el.innerHTML = `<span class="spinner"></span>${text}`;
+        el.innerHTML = `<span style='color:var(--text-color);'>⏳ ${text}</span>`;
       }
     }
 
-    // ✅ Отображение результата
     function setResult(elementId, html) {
       const el = document.getElementById(elementId);
       if (el) {
-        el.innerHTML = html;
+        const isError = html.includes("❌");
+        const boxClass = isError ? "error" : "success";
+        el.innerHTML = `<div class="response-box ${boxClass}">${html}</div>`;
       }
     }
 
@@ -145,52 +200,12 @@
       setResult('responseMessage', text);
     });
 
-    document.getElementById('clientForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      showSpinner('clientResponse', 'Создание клиента...');
-
-      const res = await fetch('/create-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-
-      const text = await res.text();
-      setResult('clientResponse', text);
-    });
-
-    document.getElementById('updateForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      data.is_new_note = "true";
-      showSpinner('updateResponse', 'Обновление клиента...');
-
-      const res = await fetch('/update-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-
-      const text = await res.text();
-      setResult('updateResponse', text);
-    });
-
-    document.getElementById('searchForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
-      data.search_type = "partial_match";
-      showSpinner('searchResponse', 'Поиск клиента...');
-
-      const res = await fetch('/search-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-
-      const text = await res.text();
-      setResult('searchResponse', text);
-    });
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.querySelector('.theme-toggle');
+      body.classList.toggle('dark-mode');
+      btn.textContent = body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    }
   </script>
 </body>
 </html>
