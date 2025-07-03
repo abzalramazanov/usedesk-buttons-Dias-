@@ -4,12 +4,14 @@ const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
+
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("."));
 
 const PORT = process.env.PORT || 3000;
 
-// ✅ Создание тикета на несколько номеров
+// ✅ Создание тикета
 app.post("/create-ticket", async (req, res) => {
   const { subject, message, client_phone, tag, user_id, status } = req.body;
 
@@ -48,7 +50,7 @@ app.post("/create-ticket", async (req, res) => {
   res.send(results.join("<br>"));
 });
 
-// ✅ Создание клиента (emails → array + универсальный client_id)
+// ✅ Создание клиента
 app.post("/create-client", async (req, res) => {
   const { name, emails, note, phone } = req.body;
 
@@ -70,7 +72,7 @@ app.post("/create-client", async (req, res) => {
         Телефон: ${phone || "-"}<br>
         Заметки: ${note || "-"}`);
     } else {
-      res.send("⚠️ Клиент создан, но ID не получен. Возможно, дубликат или урезанный ответ.");
+      res.send("⚠️ Клиент создан, но ID не получен.");
     }
 
   } catch (error) {
@@ -109,20 +111,17 @@ app.post("/update-client", async (req, res) => {
   }
 });
 
-// ✅ Поиск клиента (исправленный)
+// ✅ Поиск клиента
 app.post("/search-client", async (req, res) => {
   let { query } = req.body;
 
-  // Автоочистка и приведение к строке
-  query = String(query || "").replace(/[^0-9]/g, "");
-
-  console.log("🔍 Поиск клиента по:", query);
+  query = String(query || "").replace(/[^0-9]/g, ""); // чистим от лишнего
 
   try {
     const response = await axios.post("https://api.usedesk.ru/clients", {
       api_token: process.env.API_TOKEN,
       query,
-      search_type: "partial_match" // 🔑 вот это важно!
+      search_type: "partial_match"
     });
 
     const clients = response.data.clients;
