@@ -28,6 +28,8 @@ app.post("/create-ticket", async (req, res) => {
 
   for (const phone of phones) {
     try {
+      const isPrivate = message_type === "private";
+
       const payload = {
         api_token: process.env.API_TOKEN,
         subject,
@@ -37,12 +39,10 @@ app.post("/create-ticket", async (req, res) => {
         from: "user",
         status: Number(status),
         tag,
-        user_id: Number(user_id)
+        user_id: Number(user_id),
+        assignee_id: Number(user_id),
+        private_comment: isPrivate.toString() // "true" или "false"
       };
-
-      if (message_type === "private") {
-        payload.private_comment = "true";
-      }
 
       const response = await axios.post("https://api.usedesk.ru/create/ticket", payload);
 
