@@ -4,12 +4,10 @@ const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("."));
-
-const PORT = process.env.PORT || 3000;
 
 // ✅ Создание тикета
 app.post("/create-ticket", async (req, res) => {
@@ -21,7 +19,7 @@ app.post("/create-ticket", async (req, res) => {
 
   const phones = client_phone
     .split(",")
-    .map(p => p.trim())
+    .map(p => p.replace(/[^0-9]/g, "").replace(/^8/, "7").replace(/^(\+7)/, "7").trim())
     .filter(p => p.length > 0);
 
   const results = [];
@@ -37,11 +35,9 @@ app.post("/create-ticket", async (req, res) => {
         from: "user",
         status: Number(status),
         tag,
-        user_id: Number(user_id),
-        assignee_id: Number(user_id)
+        assignee_id: user_id,
       };
 
-      // ⛔️ Только если комментарии — добавляем private_comment
       if (message_type === "private") {
         payload.private_comment = "true";
       }
@@ -49,8 +45,8 @@ app.post("/create-ticket", async (req, res) => {
       const response = await axios.post("https://api.usedesk.ru/create/ticket", payload);
 
       const ticket_id = response.data.ticket_id || response.data.ticket?.id;
-      const ticketLink = `<a href="https://secure.usedesk.ru/tickets/${ticket_id}" target="_blank">${ticket_id}</a>`;
-      results.push(`✅ ${phone}: тикет ID ${ticketLink}`);
+      const link = `https://secure.usedesk.ru/tickets/${ticket_id}`;
+      results.push(`✅ ${phone}: <a href="${link}" target="_blank">тикет ID ${ticket_id}</a>`);
     } catch (error) {
       const err = error.response?.data?.error || error.message;
       results.push(`❌ ${phone}: ошибка — ${err}`);
@@ -58,6 +54,46 @@ app.post("/create-ticket", async (req, res) => {
   }
 
   res.send(results.join("<br>"));
+});
+
+// ✅ Поиск клиента
+app.post("/search-client", async (req, res) => {
+  let { query } = req.body;
+  query = String(query || "").replace(/[^0-9]/g, "").replace(/^8/, "7");
+
+  try {
+    const response = await axios.post("https://api.usedesk.ru/clients", {
+      api_token: process.env.API_TOKEN,
+      query,
+      search_type: "partial_match"
+    });
+
+    const clients = response.data.clients;
+    if (!clients || clients.length === 0) {
+      return res.send("⚠️ Ничего не найдено");
+    }
+
+    const list = clients.map(c => {
+      const clientLink = `https://secure.usedesk.ru/clients/details/${c.id}`;
+      const tickets = (c.tickets || [])
+        .map(t => `<a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a>`)
+        .join(", ");
+      return `
+        <div style="margin-bottom: 20px;">
+          <a href="${clientLink}" target="_blank">ID: ${c.id}</a><br>
+          Имя: ${c.name || "-"}<br>
+          Email: ${c.emails?.join(", ") || "-"}<br>
+          Тел: ${c.phone || "-"}<br>
+          Тикеты: ${tickets}
+        </div>
+      `;
+    });
+
+    res.send("🔍 Найдено:<br><br>" + list.join(""));
+  } catch (error) {
+    const err = error.response?.data?.error || error.message;
+    res.send("❌ Ошибка при поиске: " + err);
+  }
 });
 
 // ✅ Создание клиента
@@ -70,42 +106,29 @@ app.post("/create-client", async (req, res) => {
       name,
       emails: emails ? [emails] : [],
       note,
-      phone
+      phone: phone?.replace(/[^0-9]/g, "").replace(/^8/, "7")
     });
 
     const clientId = response.data.client_id || response.data.client?.id;
-
     if (clientId) {
-      const clientLink = `<a href="https://secure.usedesk.ru/clients/details/${clientId}" target="_blank">${clientId}</a>`;
-      res.send(`
-        ✅ <b>Клиент создан!</b><br>
-        ID: ${clientLink}<br>
+      const link = `https://secure.usedesk.ru/clients/details/${clientId}`;
+      res.send(`✅ Клиент создан! <a href="${link}" target="_blank">ID: ${clientId}</a><br>
         Имя: ${name || "-"}<br>
         Email: ${emails || "-"}<br>
         Телефон: ${phone || "-"}<br>
-        Заметки: ${note || "-"}
-      `);
+        Заметки: ${note || "-"}`);
     } else {
       res.send("⚠️ Клиент создан, но ID не получен.");
     }
-
   } catch (error) {
-    const errData = error.response?.data;
-    if (errData?.error) {
-      const formatted = Object.entries(errData.error)
-        .map(([field, msg]) => `❌ ${field}: ${msg.join(", ")}`)
-        .join("<br>");
-      return res.send(formatted);
-    }
-
-    const err = errData?.error || error.message;
+    const err = error.response?.data?.error || error.message;
     res.send("❌ Ошибка при создании клиента: " + err);
   }
 });
 
 // ✅ Обновление клиента
 app.post("/update-client", async (req, res) => {
-  const { client_id, name, emails, position, note } = req.body;
+  const { client_id, name, emails, phone, note } = req.body;
 
   try {
     await axios.post("https://api.usedesk.ru/update/client", {
@@ -113,7 +136,7 @@ app.post("/update-client", async (req, res) => {
       client_id,
       name,
       emails: emails ? [emails] : [],
-      position,
+      phone: phone?.replace(/[^0-9]/g, "").replace(/^8/, "7"),
       note,
       is_new_note: "true"
     });
@@ -125,72 +148,6 @@ app.post("/update-client", async (req, res) => {
   }
 });
 
-app.post("/search-client", async (req, res) => {
-  let { query } = req.body;
-
-  // Очистка номера: убираем всё, кроме цифр
-  const digitsOnly = String(query || "").replace(/\D/g, "");
-
-  // Приводим к формату 770..., если начиналось с 8 или 7
-  if (digitsOnly.length === 11 && digitsOnly.startsWith("8")) {
-    query = "7" + digitsOnly.slice(1); // 8702... -> 7702...
-  } else if (digitsOnly.length === 11 && digitsOnly.startsWith("7")) {
-    query = digitsOnly;
-  } else if (digitsOnly.length === 10) {
-    query = "7" + digitsOnly; // 702... -> 7702...
-  } else {
-    query = digitsOnly; // fallback
-  }
-
-  try {
-    const response = await axios.post("https://api.usedesk.ru/clients", {
-      api_token: process.env.API_TOKEN,
-      query,
-      search_type: "partial_match"
-    });
-
-    let clients = response.data.clients;
-    if (!clients && Array.isArray(response.data)) {
-      clients = response.data;
-    }
-
-    if (!clients || clients.length === 0) {
-      return res.send("⚠️ Ничего не найдено");
-    }
-
-const tableHTML = clients.map(c => {
-  const emailStr = Array.isArray(c.emails) ? c.emails.join(", ") : "-";
-
-  const ticketList = Array.isArray(c.tickets) && c.tickets.length
-    ? `<div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
-         <ul style="margin:0; padding-left:20px;">
-           ${c.tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join("")}
-         </ul>
-       </div>`
-    : "-";
-
-  const clientLink = `<a href="https://secure.usedesk.ru/clients/details/${c.id}" target="_blank">${c.id}</a>`;
-
-  return `
-    <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px; border-collapse: collapse; width: 100%; max-width: 700px;">
-      <tr><th>ID</th><td>${clientLink}</td></tr>
-      <tr><th>Имя</th><td>${c.name || "-"}</td></tr>
-      <tr><th>Телефон</th><td>${c.phone || "-"}</td></tr>
-      <tr><th>Email</th><td>${emailStr}</td></tr>
-      <tr><th>Тикеты</th><td>${ticketList}</td></tr>
-    </table>
-  `;
-}).join("");
-
-
-    res.send(`<div>🔍 Найдено клиентов: ${clients.length}</div><br>${tableHTML}`);
-  } catch (error) {
-    const err = error.response?.data?.error || error.message;
-    res.send("❌ Ошибка при поиске: " + err);
-  }
-});
-
-
 app.listen(PORT, () => {
-  console.log(`🚀 Сервер запущен на порту ${PORT}`);
+  console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
 });
