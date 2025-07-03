@@ -142,7 +142,7 @@
 
     #reactionImageContainer {
       text-align: center;
-      margin: 20px 0;
+      margin: 40px auto 20px;
     }
 
     #reactionImage {
@@ -155,54 +155,31 @@
   <button class="theme-toggle" onclick="toggleTheme()" title="Переключить тему">🌙</button>
   <h2>UseDesk Панель инструментов</h2>
 
-  <div id="reactionImageContainer">
-    <img id="reactionImage" src="/images/no_fuck.png" alt="reaction" />
-  </div>
-
   <button onclick="showBlock('ticketForm')">📩 Создать тикет</button>
   <button onclick="showBlock('clientSearchForm')">🔍 Найти клиента</button>
   <button onclick="showBlock('createClientForm')">👤 Создать клиента</button>
   <button onclick="showBlock('updateClientForm')">🛠 Обновить клиента</button>
 
   <form id="ticketForm" style="display:none">
-    <label>Subject*</label>
+    <label>Тема:</label>
     <input type="text" name="subject" required>
-
-    <label>Message*</label>
-    <textarea name="message" rows="4" required></textarea>
-
-    <label>Client Phone (через запятую):</label>
+    <label>Сообщение:</label>
+    <textarea name="message" required></textarea>
+    <label>Телефон клиента:</label>
     <input type="text" name="client_phone">
-
-    <label>Tag (не обязат.):</label>
+    <label>Тэг:</label>
     <input type="text" name="tag">
-
-    <label>Назначить на:</label>
-    <select name="user_id">
-      <option value="293758">Superuser</option>
-      <option value="293880">Диас</option>
-      <option value="294126">Дархан</option>
-    </select>
-
+    <label>ID агента:</label>
+    <input type="text" name="user_id">
     <label>Тип сообщения:</label>
-    <select name="message_type">
-      <option value="public">Публичный</option>
-      <option value="private">Комментарии</option>
-    </select>
-
-    <label>Статус тикета:</label>
-    <select name="status">
-      <option value="2">Выполнен</option>
-      <option value="3">Закрыт</option>
-      <option value="6">В ожидании</option>
-      <option value="9">Рассылка</option>
-    </select>
-
+    <input type="text" name="message_type">
+    <label>Статус:</label>
+    <input type="text" name="status">
     <button type="submit">Создать тикет</button>
   </form>
 
   <form id="clientSearchForm" style="display:none">
-    <label>Номер телефона или имя:</label>
+    <label>Поиск клиента:</label>
     <input type="text" name="query" required>
     <button type="submit">Найти клиента</button>
   </form>
@@ -222,34 +199,24 @@
   <form id="updateClientForm" style="display:none">
     <label>ID клиента:</label>
     <input type="text" name="client_id">
-    <label>Новое имя:</label>
+    <label>Имя:</label>
     <input type="text" name="name">
-    <label>Новый email:</label>
-    <input type="email" name="emails">
-    <label>Новый телефон:</label>
+    <label>Email:</label>
+    <input type="text" name="emails">
+    <label>Телефон:</label>
     <input type="text" name="phone">
     <label>Заметка:</label>
     <input type="text" name="note">
     <button type="submit">Обновить клиента</button>
   </form>
 
+  <div id="reactionImageContainer">
+    <img id="reactionImage" src="/images/no_fuck.png" alt="reaction" />
+  </div>
+
   <div id="responseMessage"></div>
 
   <script>
-    function showMiddleFinger() {
-      const img = document.getElementById('reactionImage');
-      img.src = '/images/fuck.png';
-      setTimeout(() => {
-        img.src = '/images/no_fuck.png';
-      }, 2000);
-    }
-
-    document.querySelectorAll("form").forEach(form => {
-      form.addEventListener('submit', () => {
-        showMiddleFinger();
-      });
-    });
-
     function toggleTheme() {
       const body = document.body;
       const btn = document.querySelector('.theme-toggle');
@@ -262,6 +229,20 @@
       document.querySelectorAll('form').forEach(f => f.style.display = 'none');
       document.getElementById(id).style.display = 'block';
     }
+
+    function showMiddleFinger() {
+      const img = document.getElementById('reactionImage');
+      img.src = '/images/fuck.png';
+      setTimeout(() => {
+        img.src = '/images/no_fuck.png';
+      }, 3000);
+    }
+
+    document.querySelectorAll("form").forEach(form => {
+      form.addEventListener('submit', () => {
+        showMiddleFinger();
+      });
+    });
   </script>
 </body>
 </html>
