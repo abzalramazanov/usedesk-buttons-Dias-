@@ -19,7 +19,7 @@ app.post("/create-ticket", async (req, res) => {
 
   const phones = client_phone
     .split(",")
-    .map(p => p.replace(/[^0-9]/g, "").replace(/^8/, "7").replace(/^(\+7)/, "7").trim())
+    .map(p => p.replace(/[^0-9]/g, "").replace(/^8/, "7").replace(/^\+7/, "7"))
     .filter(p => p.length > 0);
 
   const results = [];
@@ -56,7 +56,7 @@ app.post("/create-ticket", async (req, res) => {
   res.send(results.join("<br>"));
 });
 
-// ✅ Поиск клиента
+// ✅ Поиск клиента (отдаёт JSON для Apple UI)
 app.post("/search-client", async (req, res) => {
   let { query } = req.body;
   query = String(query || "").replace(/[^0-9]/g, "").replace(/^8/, "7");
@@ -69,33 +69,23 @@ app.post("/search-client", async (req, res) => {
       search_type: "partial_match"
     });
 
-    console.log("📦 Ответ от UseDesk:", JSON.stringify(response.data, null, 2));
-
     const clients = Array.isArray(response.data) ? response.data : response.data.clients;
     if (!clients || clients.length === 0) {
-      return res.send("⚠️ Ничего не найдено");
+      return res.json({ error: "Ничего не найдено" });
     }
 
-    const list = clients.map(c => {
-      const clientLink = `https://secure.usedesk.ru/clients/details/${c.id}`;
-      const tickets = (c.tickets || [])
-        .map(t => `<a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a>`)
-        .join(", ");
-      return `
-        <div style="margin-bottom: 20px;">
-          <a href="${clientLink}" target="_blank">ID: ${c.id}</a><br>
-          Имя: ${c.name || "-"}<br>
-          Email: ${c.emails?.join(", ") || "-"}<br>
-          Тел: ${c.phone || "-"}<br>
-          Тикеты: ${tickets}
-        </div>
-      `;
-    });
+    const formatted = clients.map(c => ({
+      id: c.id,
+      name: c.name || "-",
+      email: Array.isArray(c.emails) ? c.emails.join(", ") : "-",
+      phone: c.phone || "-",
+      tickets: c.tickets || []
+    }));
 
-    res.send("🔍 Найдено:<br><br>" + list.join(""));
+    res.json({ clients: formatted });
   } catch (error) {
     const err = error.response?.data?.error || error.message;
-    res.send("❌ Ошибка при поиске: " + err);
+    res.json({ error: "Ошибка при поиске: " + err });
   }
 });
 
