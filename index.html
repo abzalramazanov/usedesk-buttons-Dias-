@@ -71,7 +71,7 @@
       <label>Имя или номер телефона:</label><br><input type="text" name="query"><br><br>
       <button type="submit">Найти клиента</button>
     </form>
-    <p id="searchResponse" style="font-weight: bold;"></p>
+    <div id="searchResponse" style="font-weight: bold; margin-top:20px;"></div>
   </div>
 
   <script>
@@ -124,7 +124,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      document.getElementById('searchResponse').innerHTML = await res.text(); // ✅ FIXED
+      document.getElementById('searchResponse').innerHTML = await res.text();
     });
   </script>
 </body>
