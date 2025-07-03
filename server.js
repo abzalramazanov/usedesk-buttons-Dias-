@@ -62,14 +62,18 @@ app.post("/search-client", async (req, res) => {
   query = String(query || "").replace(/[^0-9]/g, "").replace(/^8/, "7");
   console.log("🔍 Поиск по:", query);
 
-  try {
-    const response = await axios.post("https://api.usedesk.ru/clients", {
-      api_token: process.env.API_TOKEN,
-      query,
-      search_type: "partial_match"
-    });
+ try {
+  const response = await axios.post("https://api.usedesk.ru/clients", {
+    api_token: process.env.API_TOKEN,
+    query,
+    search_type: "partial_match"
+  });
 
-    const clients = Array.isArray(response.data) ? response.data : response.data.clients;
+  console.log("📦 Ответ от UseDesk:", JSON.stringify(response.data, null, 2));
+
+  const clients = Array.isArray(response.data) ? response.data : response.data.clients;
+
+  // ...
 
     if (!clients || clients.length === 0) {
       return res.send("⚠️ Ничего не найдено");
