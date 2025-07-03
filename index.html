@@ -15,6 +15,7 @@
       --success-color: #0071e3;
       --error-bg: #fff3f3;
       --error-color: #d93025;
+      --result-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
     }
 
     body.dark-mode {
@@ -28,6 +29,7 @@
       --success-color: #0a84ff;
       --error-bg: #3f2b2b;
       --error-color: #ff453a;
+      --result-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
     }
 
     body {
@@ -133,6 +135,9 @@
       margin-top: 20px;
       border-radius: 12px;
       font-size: 14px;
+      max-height: 500px;
+      overflow-y: auto;
+      box-shadow: var(--result-shadow);
     }
   </style>
 </head>
@@ -267,7 +272,10 @@
 
     document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const data = Object.fromEntries(new FormData(this));
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      data.search_type = "partial_match";
+
       showSpinner('responseMessage', 'Поиск клиента...');
       const res = await fetch('/search-client', {
         method: 'POST',
@@ -281,7 +289,8 @@
         return;
       }
 
-      const html = result.clients.map(c => `
+      const clients = result.clients;
+      const html = clients.map(c => `
         <div class="client-result">
           <strong>ID:</strong> <a href="https://secure.usedesk.ru/clients/details/${c.id}" target="_blank">${c.id}</a><br>
           <strong>Имя:</strong> ${c.name}<br>
