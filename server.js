@@ -41,7 +41,7 @@ app.post("/create-ticket", async (req, res) => {
         tag,
         user_id: Number(user_id),
         assignee_id: Number(user_id),
-        private_comment: isPrivate.toString() // "true" или "false"
+        private_comment: isPrivate ? "true" : "false" // 🔥 всегда передаём явно!
       };
 
       const response = await axios.post("https://api.usedesk.ru/create/ticket", payload);
@@ -57,7 +57,6 @@ app.post("/create-ticket", async (req, res) => {
 
   res.send(results.join("<br>"));
 });
-
 
 // ✅ Создание клиента
 app.post("/create-client", async (req, res) => {
