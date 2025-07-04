@@ -284,7 +284,10 @@
     document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));
-      data.query = normalizePhone(data.query) || data.query;
+      if (/^\s*[\d\+\-\s\(\)]+$/.test(data.query)) {
+  const normalized = normalizePhone(data.query);
+  if (normalized) data.query = normalized;
+}
       data.search_type = "partial_match";
       showSpinner('responseMessage', 'Поиск клиента...');
       const res = await fetch('/search-client', {
