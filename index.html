@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -40,16 +39,12 @@
       padding: 40px;
       color: var(--text-color);
       transition: background 0.3s, color 0.3s;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
     }
 
     h2 {
       font-size: 24px;
       font-weight: 600;
       margin-bottom: 30px;
-      width: 100%;
     }
 
     button, select, input, textarea {
@@ -67,7 +62,6 @@
       background-color: var(--primary);
       color: #fff;
       border: none;
-      cursor: pointer;
     }
 
     button:hover {
@@ -82,7 +76,6 @@
       max-width: 640px;
       margin-bottom: 40px;
       transition: background 0.3s;
-      flex: 1 1 600px;
     }
 
     label {
@@ -115,72 +108,87 @@
       border-left: 5px solid var(--error-color);
     }
 
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
     .theme-toggle {
-      position: fixed;
+      position: absolute;
       top: 20px;
-      right: 20px;
+      left: 20px;
       font-size: 20px;
       background: none;
       border: none;
+      cursor: pointer;
     }
 
-    .image-block {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 1 1 300px;
-      margin-top: 30px;
-    }
-
-    .image-block img {
-      max-height: 300px;
-      max-width: 100%;
+    .client-result {
+      background: var(--success-bg);
+      color: var(--text-color);
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      max-height: 500px;
+      overflow-y: auto;
+      box-shadow: var(--result-shadow);
     }
   </style>
 </head>
 <body>
-  <button class="theme-toggle" onclick="toggleTheme()" title="Тема">🌙</button>
-  
+  <button class="theme-toggle" onclick="toggleTheme()" title="Переключить тему">🌙</button>
   <h2>UseDesk Панель инструментов</h2>
-  <button onclick="showForm('ticketForm')">📩 Создать тикет</button>
-  <button onclick="showForm('clientSearchForm')">🔍 Найти клиента</button>
-  <button onclick="showForm('createClientForm')">👤 Создать клиента</button>
-  <button onclick="showForm('updateClientForm')">🛠 Обновить клиента</button>
 
+  <button onclick="showBlock('ticketForm')">📩 Создать тикет</button>
+  <button onclick="showBlock('clientSearchForm')">🔍 Найти клиента</button>
+  <button onclick="showBlock('createClientForm')">👤 Создать клиента</button>
+  <button onclick="showBlock('updateClientForm')">🛠 Обновить клиента</button>
 
-  <form id="ticketForm">
-    <label>Тема:</label>
+  <form id="ticketForm" style="display:none">
+    <label>Subject*</label>
     <input type="text" name="subject" required>
-    <label>Сообщение:</label>
-    <textarea name="message" required></textarea>
-    <label>Телефон клиента:</label>
-    <input type="text" name="client_phone" value="77" required>
-    <label>Тэг:</label>
+
+    <label>Message*</label>
+    <textarea name="message" rows="4" required></textarea>
+
+    <label>Client Phone (через запятую):</label>
+    <input type="text" name="client_phone">
+
+    <label>Tag (не обязат.):</label>
     <input type="text" name="tag">
-    <label>ID агента:</label>
+
+    <label>Назначить на:</label>
     <select name="user_id">
       <option value="293758">Superuser</option>
-      <option value="293880">Дархан</option>
-      <option value="294126">Диас</option>
+      <option value="293880">Диас</option>
+      <option value="294126">Дархан</option>
     </select>
+
     <label>Тип сообщения:</label>
     <select name="message_type">
-      <option value="comment">Комментарий</option>
       <option value="public">Публичный</option>
+      <option value="private">Комментарии</option>
     </select>
-    <label>Статус:</label>
+
+    <label>Статус тикета:</label>
     <select name="status">
       <option value="2">Выполнен</option>
       <option value="3">Закрыт</option>
       <option value="6">В ожидании</option>
       <option value="9">Рассылка</option>
     </select>
-    <button type="submit" id="submitBtn">Создать тикет</button>
-  
+
+    <button type="submit">Создать тикет</button>
   </form>
 
   <form id="clientSearchForm" style="display:none">
-    <label>Поиск клиента:</label>
+    <label>Номер телефона или имя:</label>
     <input type="text" name="query" required>
     <button type="submit">Найти клиента</button>
   </form>
@@ -191,7 +199,7 @@
     <label>Email:</label>
     <input type="email" name="emails">
     <label>Телефон:</label>
-    <input type="text" name="phone" value="77">
+    <input type="text" name="phone">
     <label>Заметка:</label>
     <input type="text" name="note">
     <button type="submit">Создать клиента</button>
@@ -200,126 +208,145 @@
   <form id="updateClientForm" style="display:none">
     <label>ID клиента:</label>
     <input type="text" name="client_id">
-    <label>Имя:</label>
+    <label>Новое имя:</label>
     <input type="text" name="name">
-    <label>Email:</label>
+    <label>Новый email:</label>
     <input type="email" name="emails">
-    <label>Телефон:</label>
+    <label>Новый телефон:</label>
     <input type="text" name="phone">
     <label>Заметка:</label>
     <input type="text" name="note">
     <button type="submit">Обновить клиента</button>
   </form>
 
-  <div class="image-block">
-
-    <img src="/images/no_fuck.png" alt="reaction" id="reactionImage">
-  </div>
-
-  <div id="responseMessage" style="width: 100%;"></div>
+  <div id="responseMessage"></div>
 
   <script>
-    function toggleTheme() {
-      const body = document.body;
-      const isDark = body.classList.toggle('dark-mode');
-      document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    }
-
-    if (localStorage.getItem('theme') === 'dark') {
-      document.body.classList.add('dark-mode');
-      document.querySelector('.theme-toggle').textContent = '☀️';
-    }
-
     function normalizePhone(raw) {
       const cleaned = raw.replace(/[^0-9]/g, '');
       if (cleaned.length < 11) return null;
       return cleaned.replace(/^8/, '7').replace(/^\+7/, '7');
     }
 
-    document.getElementById("ticketForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById("submitBtn");
-      const originalText = btn.textContent;
-      btn.textContent = 'Создание...';
-      btn.disabled = true;
-
-      const data = Object.fromEntries(new FormData(e.target));
-
-      const payload = {
-        api_token: "12ff4f2af60aee0fe6869cec6e2c8401df7980b7",
-        subject: data.subject,
-        message: data.message,
-        client_phone: normalizePhone(data.client_phone),
-        channel_id: "66235",
-        from: "user",
-        tag: data.tag,
-        user_id: data.user_id,
-        assignee_id: data.user_id,
-        status: data.status
-      };
-
-      if (data.message_type === "comment") {
-        payload.private_comment = "true";
+    function showSpinner(elementId, text = "Загрузка...") {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.innerHTML = `<span style='color:var(--text-color);'>⏳ ${text}</span>`;
       }
+    }
 
-      const res = await fetch("/create-ticket", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+    function setResult(elementId, html) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.innerHTML = html;
+      }
+    }
 
-      const resText = await res.text();
-      document.getElementById("responseMessage").innerHTML = `<div class="response-box success">${resText}</div>`;
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.querySelector('.theme-toggle');
+      const dark = body.classList.toggle('dark-mode');
+      btn.textContent = dark ? '☀️' : '🌙';
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+    }
 
-      btn.textContent = originalText;
-      btn.disabled = false;
-    });
-  
-    function showForm(id) {
+    function showBlock(id) {
       document.querySelectorAll('form').forEach(f => f.style.display = 'none');
       document.getElementById(id).style.display = 'block';
     }
 
-    document.querySelectorAll("form").forEach(form => {
-      form.addEventListener("submit", async (e) => {
-        if (form.id === "ticketForm") return; // уже обработан отдельно
-        e.preventDefault();
-        const data = Object.fromEntries(new FormData(form));
-        let endpoint = "";
-        let payload = {};
+    window.onload = () => {
+      const theme = localStorage.getItem('theme');
+      if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.theme-toggle').textContent = '☀️';
+      }
+    }
 
-        if (form.id === "clientSearchForm") {
-          endpoint = "/search-client";
-          payload = { query: normalizePhone(data.query) || data.query };
-        } else if (form.id === "createClientForm") {
-          endpoint = "/create-client";
-          payload = {
-            name: data.name,
-            emails: data.emails,
-            phone: normalizePhone(data.phone),
-            note: data.note
-          };
-        } else if (form.id === "updateClientForm") {
-          endpoint = "/update-client";
-          payload = {
-            client_id: data.client_id,
-            name: data.name,
-            emails: data.emails,
-            phone: normalizePhone(data.phone),
-            note: data.note
-          };
-        }
-
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const resText = await res.text();
-        document.getElementById("responseMessage").innerHTML = '<div class="response-box success">' + resText + '</div>';
+    document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      if (data.client_phone) {
+        const phones = data.client_phone.split(',').map(normalizePhone).filter(Boolean);
+        if (!phones.length) return alert("❗ Введите хотя бы один корректный номер телефона (11 цифр)");
+        data.client_phone = phones.join(',');
+      }
+      showSpinner('responseMessage', 'Создание тикета...');
+      const res = await fetch('/create-ticket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
       });
+      const text = await res.text();
+      setResult('responseMessage', `<div class="response-box success">${text}</div>`);
+    });
+
+    document.getElementById('clientSearchForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      data.query = normalizePhone(data.query) || data.query;
+      data.search_type = "partial_match";
+      showSpinner('responseMessage', 'Поиск клиента...');
+      const res = await fetch('/search-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.error) {
+        setResult('responseMessage', `<div class="response-box error">❌ ${result.error}</div>`);
+        return;
+      }
+      const clients = result.clients;
+      const html = clients.map(c => `
+        <div class="client-result">
+          <strong>ID:</strong> <a href="https://secure.usedesk.ru/clients/details/${c.id}" target="_blank">${c.id}</a><br>
+          <strong>Имя:</strong> ${c.name}<br>
+          <strong>Email:</strong> ${c.email}<br>
+          <strong>Тел:</strong> ${c.phone}<br>
+          <strong>Тикеты:</strong>
+          <ul>
+            ${c.tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
+      setResult('responseMessage', html);
+    });
+
+    document.getElementById('createClientForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      if (data.phone) {
+        const phone = normalizePhone(data.phone);
+        if (!phone) return alert("❗ Введите корректный номер телефона (11 цифр)");
+        data.phone = phone;
+      }
+      showSpinner('responseMessage', 'Создание клиента...');
+      const res = await fetch('/create-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const text = await res.text();
+      setResult('responseMessage', `<div class="response-box success">${text}</div>`);
+    });
+
+    document.getElementById('updateClientForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      if (data.phone) {
+        const phone = normalizePhone(data.phone);
+        if (!phone) return alert("❗ Введите корректный номер телефона (11 цифр)");
+        data.phone = phone;
+      }
+      showSpinner('responseMessage', 'Обновление клиента...');
+      const res = await fetch('/update-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const text = await res.text();
+      setResult('responseMessage', `<div class="response-box success">${text}</div>`);
     });
   </script>
 </body>
