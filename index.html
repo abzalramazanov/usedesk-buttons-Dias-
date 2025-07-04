@@ -62,6 +62,7 @@
       background-color: var(--primary);
       color: #fff;
       border: none;
+      cursor: pointer;
     }
 
     button:hover {
@@ -108,26 +109,6 @@
       border-left: 5px solid var(--error-color);
     }
 
-    a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    .theme-toggle {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      font-size: 20px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
     .client-result {
       background: var(--success-bg);
       color: var(--text-color);
@@ -140,142 +121,128 @@
       box-shadow: var(--result-shadow);
     }
 
-    #reactionImageContainer {
-      text-align: center;
-      margin: 0 auto 20px;
-    }
-
-    #reactionImage {
-      max-height: 300px;
-      transition: opacity 0.3s ease;
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 20px;
+      background: none;
+      border: none;
     }
 
     .loader {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid var(--primary);
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
       display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid #fff;
+      border-top: 3px solid var(--primary-hover);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
       vertical-align: middle;
-      margin-left: 10px;
+      margin-left: 8px;
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
 
-    .flex-row {
-      display: flex;
-      gap: 40px;
-      align-items: flex-start;
+    .image-block {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .image-block img {
+      max-height: 300px;
     }
   </style>
 </head>
 <body>
-  <button class="theme-toggle" onclick="toggleTheme()" title="Переключить тему">🌙</button>
+  <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
   <h2>UseDesk Панель инструментов</h2>
 
-  <div class="flex-row">
-    <div>
-      <button onclick="showBlock('ticketForm')">📩 Создать тикет</button>
-      <button onclick="showBlock('clientSearchForm')">🔍 Найти клиента</button>
-      <button onclick="showBlock('createClientForm')">👤 Создать клиента</button>
-      <button onclick="showBlock('updateClientForm')">🛠 Обновить клиента</button>
-
-      <form id="ticketForm" style="display:none">
-        <label>Тема:</label>
-        <input type="text" name="subject" required>
-        <label>Сообщение:</label>
-        <textarea name="message" required></textarea>
-        <label>Телефон клиента:</label>
-        <input type="text" name="client_phone" value="77" required>
-        <label>Тэг:</label>
-        <input type="text" name="tag">
-        <label>ID агента:</label>
-        <select name="user_id">
-          <option value="293758">Superuser</option>
-          <option value="293880">Дархан</option>
-          <option value="294126">Диас</option>
-        </select>
-        <label>Тип сообщения:</label>
-        <select name="message_type" onchange="togglePrivateComment(this)">
-          <option value="comment">Комментарий</option>
-          <option value="public">Публичный</option>
-        </select>
-        <input type="hidden" name="private_comment" value="true">
-        <label>Статус:</label>
-        <select name="status">
-          <option value="2">Выполнен</option>
-          <option value="3">Закрыт</option>
-          <option value="6">В ожидании</option>
-          <option value="9">Рассылка</option>
-        </select>
-        <button type="submit">Создать тикет <span class="loader" id="loader" style="display:none"></span></button>
-      </form>
-
-      <form id="clientSearchForm" style="display:none">
-        <label>Поиск клиента:</label>
-        <input type="text" name="query" required>
-        <button type="submit">Найти клиента <span class="loader" style="display:none"></span></button>
-      </form>
-
-      <form id="createClientForm" style="display:none">
-        <label>Имя:</label>
-        <input type="text" name="name">
-        <label>Email:</label>
-        <input type="email" name="emails">
-        <label>Телефон:</label>
-        <input type="text" name="phone">
-        <label>Заметка:</label>
-        <input type="text" name="note">
-        <button type="submit">Создать клиента <span class="loader" style="display:none"></span></button>
-      </form>
-
-      <form id="updateClientForm" style="display:none">
-        <label>ID клиента:</label>
-        <input type="text" name="client_id">
-        <label>Имя:</label>
-        <input type="text" name="name">
-        <label>Email:</label>
-        <input type="text" name="emails">
-        <label>Телефон:</label>
-        <input type="text" name="phone">
-        <label>Заметка:</label>
-        <input type="text" name="note">
-        <button type="submit">Обновить клиента <span class="loader" style="display:none"></span></button>
-      </form>
-    </div>
-
-    <div id="reactionImageContainer">
-      <img id="reactionImage" src="/images/no_fuck.png" alt="reaction" />
-    </div>
+  <div class="image-block">
+    <img id="reactionImage" src="/images/no_fuck.png" alt="reaction" />
   </div>
+
+  <button onclick="showForm('ticketForm')">📩 Создать тикет</button>
+  <button onclick="showForm('clientSearchForm')">🔍 Найти клиента</button>
+  <button onclick="showForm('createClientForm')">👤 Создать клиента</button>
+  <button onclick="showForm('updateClientForm')">🛠 Обновить клиента</button>
+
+  <form id="ticketForm" style="display:none">
+    <label>Тема:</label>
+    <input type="text" name="subject" required>
+    <label>Сообщение:</label>
+    <textarea name="message" required></textarea>
+    <label>Телефон клиента:</label>
+    <input type="text" name="client_phone" value="77" required>
+    <label>Тэг:</label>
+    <input type="text" name="tag">
+    <label>ID агента:</label>
+    <select name="user_id">
+      <option value="293758">Superuser</option>
+      <option value="293880">Дархан</option>
+      <option value="294126">Диас</option>
+    </select>
+    <label>Тип сообщения:</label>
+    <select name="message_type">
+      <option value="comment">Комментарий</option>
+      <option value="public">Публичный</option>
+    </select>
+    <label>Статус:</label>
+    <select name="status">
+      <option value="2">Выполнен</option>
+      <option value="3">Закрыт</option>
+      <option value="6">В ожидании</option>
+      <option value="9">Рассылка</option>
+    </select>
+    <button type="submit" id="submitTicket">Создать тикет</button>
+  </form>
+
+  <form id="clientSearchForm" style="display:none">
+    <label>Поиск клиента:</label>
+    <input type="text" name="query" required>
+    <button type="submit">Найти клиента</button>
+  </form>
+
+  <form id="createClientForm" style="display:none">
+    <label>Имя:</label>
+    <input type="text" name="name">
+    <label>Email:</label>
+    <input type="email" name="emails">
+    <label>Телефон:</label>
+    <input type="text" name="phone" value="77">
+    <label>Заметка:</label>
+    <input type="text" name="note">
+    <button type="submit">Создать клиента</button>
+  </form>
+
+  <form id="updateClientForm" style="display:none">
+    <label>ID клиента:</label>
+    <input type="text" name="client_id">
+    <label>Имя:</label>
+    <input type="text" name="name">
+    <label>Email:</label>
+    <input type="email" name="emails">
+    <label>Телефон:</label>
+    <input type="text" name="phone">
+    <label>Заметка:</label>
+    <input type="text" name="note">
+    <button type="submit">Обновить клиента</button>
+  </form>
 
   <div id="responseMessage"></div>
 
   <script>
     function toggleTheme() {
       const body = document.body;
-      const btn = document.querySelector('.theme-toggle');
       const dark = body.classList.toggle('dark-mode');
-      btn.textContent = dark ? '☀️' : '🌙';
-      localStorage.setItem('theme', dark ? 'dark' : 'light');
+      document.querySelector('.theme-toggle').textContent = dark ? '☀️' : '🌙';
     }
 
-    function showBlock(id) {
-      document.querySelectorAll('form').forEach(f => f.style.display = 'none');
-      document.getElementById(id).style.display = 'block';
-    }
-
-    function showMiddleFinger() {
-      const img = document.getElementById('reactionImage');
-      img.src = '/images/fuck.png';
-      setTimeout(() => {
-        img.src = '/images/no_fuck.png';
-      }, 3000);
+    function showForm(id) {
+      document.querySelectorAll("form").forEach(f => f.style.display = "none");
+      document.getElementById(id).style.display = "block";
     }
 
     function normalizePhone(raw) {
@@ -284,82 +251,68 @@
       return cleaned.replace(/^8/, '7').replace(/^\+7/, '7');
     }
 
-    function togglePrivateComment(selectEl) {
-      const hiddenInput = document.querySelector('input[name="private_comment"]');
-      hiddenInput.value = selectEl.value === 'comment' ? 'true' : '';
-    }
-
     document.querySelectorAll("form").forEach(form => {
-      form.addEventListener('submit', async (e) => {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        showMiddleFinger();
 
-        const loader = form.querySelector('.loader');
-        if (loader) loader.style.display = 'inline-block';
+        const btn = form.querySelector("button[type='submit']");
+        const original = btn.innerHTML;
+        btn.innerHTML = '⏳<span class="loader"></span>';
+        btn.disabled = true;
 
         const data = Object.fromEntries(new FormData(form));
         const formId = form.id;
-        let path = '';
+        let path = "";
+        let bodyData = {};
 
-        if (formId === 'ticketForm') {
-          if (data.client_phone) {
-            const phones = data.client_phone.split(',').map(normalizePhone).filter(Boolean);
-            if (!phones.length) return alert("❗ Введите хотя бы один корректный номер телефона (11 цифр)");
-            data.client_phone = phones.join(',');
+        if (formId === "ticketForm") {
+          path = "/create-ticket";
+          bodyData = {
+            api_token: "12ff4f2af60aee0fe6869cec6e2c8401df7980b7",
+            subject: data.subject,
+            message: data.message,
+            client_phone: normalizePhone(data.client_phone),
+            channel_id: "66235",
+            from: "user",
+            tag: data.tag,
+            user_id: data.user_id,
+            status: data.status
+          };
+          if (data.message_type === "comment") {
+            bodyData.private_comment = "true";
           }
-          path = '/create-ticket';
-        } else if (formId === 'clientSearchForm') {
-          data.query = normalizePhone(data.query) || data.query;
-          data.search_type = "partial_match";
-          path = '/search-client';
-        } else if (formId === 'createClientForm') {
-          if (data.phone) {
-            const phone = normalizePhone(data.phone);
-            if (!phone) return alert("❗ Введите корректный номер телефона (11 цифр)");
-            data.phone = phone;
-          }
-          path = '/create-client';
-        } else if (formId === 'updateClientForm') {
-          if (data.phone) {
-            const phone = normalizePhone(data.phone);
-            if (!phone) return alert("❗ Введите корректный номер телефона (11 цифр)");
-            data.phone = phone;
-          }
-          path = '/update-client';
+        } else if (formId === "clientSearchForm") {
+          path = "/search-client";
+          bodyData = { query: normalizePhone(data.query) || data.query };
+        } else if (formId === "createClientForm") {
+          path = "/create-client";
+          bodyData = {
+            name: data.name,
+            emails: data.emails,
+            phone: normalizePhone(data.phone),
+            note: data.note
+          };
+        } else if (formId === "updateClientForm") {
+          path = "/update-client";
+          bodyData = {
+            client_id: data.client_id,
+            name: data.name,
+            emails: data.emails,
+            phone: normalizePhone(data.phone),
+            note: data.note
+          };
         }
 
         const res = await fetch(path, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bodyData)
         });
 
-        if (loader) loader.style.display = 'none';
-
-        const contentType = res.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const json = await res.json();
-          if (json.error) {
-            document.getElementById("responseMessage").innerHTML = `<div class="response-box error">❌ ${json.error}</div>`;
-            return;
-          }
-          const html = json.clients.map(c => `
-            <div class="client-result">
-              <strong>ID:</strong> <a href="https://secure.usedesk.ru/clients/details/${c.id}" target="_blank">${c.id}</a><br>
-              <strong>Имя:</strong> ${c.name}<br>
-              <strong>Email:</strong> ${c.email}<br>
-              <strong>Тел:</strong> ${c.phone}<br>
-              <strong>Тикеты:</strong>
-              <ul>
-                ${c.tickets.map(t => `<li><a href="https://secure.usedesk.ru/tickets/${t}" target="_blank">${t}</a></li>`).join('')}
-              </ul>
-            </div>
-          `).join('');
-          document.getElementById("responseMessage").innerHTML = html;
-        } else {
-          const text = await res.text();
-          document.getElementById("responseMessage").innerHTML = `<div class="response-box success">${text}</div>`;
-        }
+        const resText = await res.text();
+        document.getElementById("responseMessage").innerHTML = `<div class="response-box success">${resText}</div>`;
+        btn.innerHTML = original;
+        btn.disabled = false;
       });
     });
   </script>
