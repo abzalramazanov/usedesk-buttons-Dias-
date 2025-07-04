@@ -166,15 +166,28 @@
     <label>Сообщение:</label>
     <textarea name="message" required></textarea>
     <label>Телефон клиента:</label>
-    <input type="text" name="client_phone">
+    <input type="text" name="client_phone" value="77" required>
     <label>Тэг:</label>
     <input type="text" name="tag">
     <label>ID агента:</label>
-    <input type="text" name="user_id">
+    <select name="user_id">
+      <option value="293758">Superuser</option>
+      <option value="293880">Дархан</option>
+      <option value="294126">Диас</option>
+    </select>
     <label>Тип сообщения:</label>
-    <input type="text" name="message_type">
+    <select name="message_type" onchange="togglePrivateComment(this)">
+      <option value="comment">Комментарий</option>
+      <option value="public">Публичный</option>
+    </select>
+    <input type="hidden" name="private_comment" value="true">
     <label>Статус:</label>
-    <input type="text" name="status">
+    <select name="status">
+      <option value="2">Выполнен</option>
+      <option value="3">Закрыт</option>
+      <option value="6">В ожидании</option>
+      <option value="9">Рассылка</option>
+    </select>
     <button type="submit">Создать тикет</button>
   </form>
 
@@ -242,6 +255,11 @@
       const cleaned = raw.replace(/[^0-9]/g, '');
       if (cleaned.length < 11) return null;
       return cleaned.replace(/^8/, '7').replace(/^\+7/, '7');
+    }
+
+    function togglePrivateComment(selectEl) {
+      const hiddenInput = document.querySelector('input[name="private_comment"]');
+      hiddenInput.value = selectEl.value === 'comment' ? 'true' : '';
     }
 
     document.querySelectorAll("form").forEach(form => {
@@ -314,4 +332,4 @@
     });
   </script>
 </body>
-</html> 
+</html>
