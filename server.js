@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(express.static("."));
-app.use('/images', express.static(__dirname + '/images')); // ✅ для отдачи картинок fuck / no_fuck
+app.use("/images", express.static(__dirname + "/images")); // для отдачи картинок
 
 // ✅ Создание тикета
 app.post("/create-ticket", async (req, res) => {
@@ -20,8 +20,8 @@ app.post("/create-ticket", async (req, res) => {
 
   const phones = client_phone
     .split(",")
-    .map(p => p.replace(/[^0-9]/g, "").replace(/^8/, "7").replace(/^\+7/, "7"))
-    .filter(p => p.length > 0);
+    .map((p) => p.replace(/[^0-9]/g, "").replace(/^8/, "7").replace(/^\+7/, "7"))
+    .filter((p) => p.length > 0);
 
   const results = [];
 
@@ -57,30 +57,34 @@ app.post("/create-ticket", async (req, res) => {
   res.send(results.join("<br>"));
 });
 
-// ✅ Поиск клиента (отдаёт JSON для Apple UI)
+// ✅ Поиск клиента (работает по цифрам, тексту и их сочетанию)
 app.post("/search-client", async (req, res) => {
   let { query } = req.body;
-  query = String(query || "").replace(/[^0-9]/g, "").replace(/^8/, "7");
+  query = String(query || "").trim(); // никаких замен, ищем по всему
+
   console.log("🔍 Поиск по:", query);
 
   try {
     const response = await axios.post("https://api.usedesk.ru/clients", {
       api_token: process.env.API_TOKEN,
       query,
-      search_type: "partial_match"
+      search_type: "partial_match",
     });
 
-    const clients = Array.isArray(response.data) ? response.data : response.data.clients;
+    const clients = Array.isArray(response.data)
+      ? response.data
+      : response.data.clients;
+
     if (!clients || clients.length === 0) {
       return res.json({ error: "Ничего не найдено" });
     }
 
-    const formatted = clients.map(c => ({
+    const formatted = clients.map((c) => ({
       id: c.id,
       name: c.name || "-",
       email: Array.isArray(c.emails) ? c.emails.join(", ") : "-",
       phone: c.phone || "-",
-      tickets: c.tickets || []
+      tickets: c.tickets || [],
     }));
 
     res.json({ clients: formatted });
@@ -100,7 +104,7 @@ app.post("/create-client", async (req, res) => {
       name,
       emails: emails ? [emails] : [],
       note,
-      phone: phone?.replace(/[^0-9]/g, "").replace(/^8/, "7")
+      phone: phone?.replace(/[^0-9]/g, "").replace(/^8/, "7"),
     });
 
     const clientId = response.data.client_id || response.data.client?.id;
@@ -132,7 +136,7 @@ app.post("/update-client", async (req, res) => {
       emails: emails ? [emails] : [],
       phone: phone?.replace(/[^0-9]/g, "").replace(/^8/, "7"),
       note,
-      is_new_note: "true"
+      is_new_note: "true",
     });
 
     res.send("✅ Клиент обновлён");
