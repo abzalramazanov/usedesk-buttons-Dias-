@@ -142,12 +142,35 @@
 
     #reactionImageContainer {
       text-align: center;
-      margin: 40px auto 20px;
+      margin: 0 auto 20px;
     }
 
     #reactionImage {
       max-height: 300px;
       transition: opacity 0.3s ease;
+    }
+
+    .loader {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
     }
   </style>
 </head>
@@ -155,76 +178,80 @@
   <button class="theme-toggle" onclick="toggleTheme()" title="Переключить тему">🌙</button>
   <h2>UseDesk Панель инструментов</h2>
 
-  <button onclick="showBlock('ticketForm')">📩 Создать тикет</button>
-  <button onclick="showBlock('clientSearchForm')">🔍 Найти клиента</button>
-  <button onclick="showBlock('createClientForm')">👤 Создать клиента</button>
-  <button onclick="showBlock('updateClientForm')">🛠 Обновить клиента</button>
+  <div class="flex-row">
+    <div>
+      <button onclick="showBlock('ticketForm')">📩 Создать тикет</button>
+      <button onclick="showBlock('clientSearchForm')">🔍 Найти клиента</button>
+      <button onclick="showBlock('createClientForm')">👤 Создать клиента</button>
+      <button onclick="showBlock('updateClientForm')">🛠 Обновить клиента</button>
 
-  <form id="ticketForm" style="display:none">
-    <label>Тема:</label>
-    <input type="text" name="subject" required>
-    <label>Сообщение:</label>
-    <textarea name="message" required></textarea>
-    <label>Телефон клиента:</label>
-    <input type="text" name="client_phone" value="77" required>
-    <label>Тэг:</label>
-    <input type="text" name="tag">
-    <label>ID агента:</label>
-    <select name="user_id">
-      <option value="293758">Superuser</option>
-      <option value="293880">Дархан</option>
-      <option value="294126">Диас</option>
-    </select>
-    <label>Тип сообщения:</label>
-    <select name="message_type" onchange="togglePrivateComment(this)">
-      <option value="comment">Комментарий</option>
-      <option value="public">Публичный</option>
-    </select>
-    <input type="hidden" name="private_comment" value="true">
-    <label>Статус:</label>
-    <select name="status">
-      <option value="2">Выполнен</option>
-      <option value="3">Закрыт</option>
-      <option value="6">В ожидании</option>
-      <option value="9">Рассылка</option>
-    </select>
-    <button type="submit">Создать тикет</button>
-  </form>
+      <form id="ticketForm" style="display:none">
+        <label>Тема:</label>
+        <input type="text" name="subject" required>
+        <label>Сообщение:</label>
+        <textarea name="message" required></textarea>
+        <label>Телефон клиента:</label>
+        <input type="text" name="client_phone" value="77" required>
+        <label>Тэг:</label>
+        <input type="text" name="tag">
+        <label>ID агента:</label>
+        <select name="user_id">
+          <option value="293758">Superuser</option>
+          <option value="293880">Дархан</option>
+          <option value="294126">Диас</option>
+        </select>
+        <label>Тип сообщения:</label>
+        <select name="message_type" onchange="togglePrivateComment(this)">
+          <option value="comment">Комментарий</option>
+          <option value="public">Публичный</option>
+        </select>
+        <input type="hidden" name="private_comment" value="true">
+        <label>Статус:</label>
+        <select name="status">
+          <option value="2">Выполнен</option>
+          <option value="3">Закрыт</option>
+          <option value="6">В ожидании</option>
+          <option value="9">Рассылка</option>
+        </select>
+        <button type="submit">Создать тикет <span class="loader" id="loader" style="display:none"></span></button>
+      </form>
 
-  <form id="clientSearchForm" style="display:none">
-    <label>Поиск клиента:</label>
-    <input type="text" name="query" required>
-    <button type="submit">Найти клиента</button>
-  </form>
+      <form id="clientSearchForm" style="display:none">
+        <label>Поиск клиента:</label>
+        <input type="text" name="query" required>
+        <button type="submit">Найти клиента <span class="loader" style="display:none"></span></button>
+      </form>
 
-  <form id="createClientForm" style="display:none">
-    <label>Имя:</label>
-    <input type="text" name="name">
-    <label>Email:</label>
-    <input type="email" name="emails">
-    <label>Телефон:</label>
-    <input type="text" name="phone">
-    <label>Заметка:</label>
-    <input type="text" name="note">
-    <button type="submit">Создать клиента</button>
-  </form>
+      <form id="createClientForm" style="display:none">
+        <label>Имя:</label>
+        <input type="text" name="name">
+        <label>Email:</label>
+        <input type="email" name="emails">
+        <label>Телефон:</label>
+        <input type="text" name="phone">
+        <label>Заметка:</label>
+        <input type="text" name="note">
+        <button type="submit">Создать клиента <span class="loader" style="display:none"></span></button>
+      </form>
 
-  <form id="updateClientForm" style="display:none">
-    <label>ID клиента:</label>
-    <input type="text" name="client_id">
-    <label>Имя:</label>
-    <input type="text" name="name">
-    <label>Email:</label>
-    <input type="text" name="emails">
-    <label>Телефон:</label>
-    <input type="text" name="phone">
-    <label>Заметка:</label>
-    <input type="text" name="note">
-    <button type="submit">Обновить клиента</button>
-  </form>
+      <form id="updateClientForm" style="display:none">
+        <label>ID клиента:</label>
+        <input type="text" name="client_id">
+        <label>Имя:</label>
+        <input type="text" name="name">
+        <label>Email:</label>
+        <input type="text" name="emails">
+        <label>Телефон:</label>
+        <input type="text" name="phone">
+        <label>Заметка:</label>
+        <input type="text" name="note">
+        <button type="submit">Обновить клиента <span class="loader" style="display:none"></span></button>
+      </form>
+    </div>
 
-  <div id="reactionImageContainer">
-    <img id="reactionImage" src="/images/no_fuck.png" alt="reaction" />
+    <div id="reactionImageContainer">
+      <img id="reactionImage" src="/images/no_fuck.png" alt="reaction" />
+    </div>
   </div>
 
   <div id="responseMessage"></div>
@@ -267,6 +294,9 @@
         e.preventDefault();
         showMiddleFinger();
 
+        const loader = form.querySelector('.loader');
+        if (loader) loader.style.display = 'inline-block';
+
         const data = Object.fromEntries(new FormData(form));
         const formId = form.id;
         let path = '';
@@ -303,6 +333,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
+
+        if (loader) loader.style.display = 'none';
 
         const contentType = res.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
