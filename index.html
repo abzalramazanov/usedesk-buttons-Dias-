@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,159 +18,81 @@
       --error-color: #d93025;
       --result-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
     }
-
-    body.dark-mode {
-      --bg-color: #1d1d1f;
-      --text-color: #f5f5f7;
-      --form-bg: #2c2c2e;
-      --border-color: #3a3a3c;
-      --primary: #0a84ff;
-      --primary-hover: #0060df;
-      --success-bg: #1e3a5f;
-      --success-color: #0a84ff;
-      --error-bg: #3f2b2b;
-      --error-color: #ff453a;
-      --result-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
-    }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: sans-serif;
       background: var(--bg-color);
+      color: var(--text-color);
       margin: 0;
       padding: 40px;
-      color: var(--text-color);
-      transition: background 0.3s, color 0.3s;
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
     }
-
-    h2 {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 30px;
-    }
-
-    button, select, input, textarea {
-      font-size: 16px;
-      padding: 10px 14px;
-      margin-bottom: 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      background: var(--form-bg);
-      color: var(--text-color);
-      transition: all 0.2s ease;
-    }
-
-    button {
-      background-color: var(--primary);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: var(--primary-hover);
-    }
-
     form {
       background: var(--form-bg);
       padding: 30px;
       border-radius: 20px;
+      max-width: 600px;
+      width: 100%;
       box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-      max-width: 640px;
-      margin-bottom: 40px;
-      transition: background 0.3s;
     }
-
     label {
       font-weight: 500;
       display: block;
       margin: 12px 0 4px;
     }
-
-    textarea {
-      resize: vertical;
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
     }
-
     .response-box {
       margin-top: 20px;
-      padding: 16px;
-      border-radius: 16px;
-      font-size: 15px;
-      transition: 0.2s ease;
+      padding: 12px;
+      border-radius: 8px;
     }
-
-    .response-box.success {
-      background: var(--success-bg);
-      color: var(--success-color);
-      border-left: 5px solid var(--success-color);
-    }
-
-    .response-box.error {
-      background: var(--error-bg);
-      color: var(--error-color);
-      border-left: 5px solid var(--error-color);
-    }
-
-    .client-result {
-      background: var(--success-bg);
-      color: var(--text-color);
-      padding: 20px;
-      margin-top: 20px;
-      border-radius: 12px;
-      font-size: 14px;
-      max-height: 500px;
-      overflow-y: auto;
-      box-shadow: var(--result-shadow);
-    }
-
-    .theme-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      font-size: 20px;
-      background: none;
-      border: none;
-    }
-
-    .loader {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 3px solid #fff;
-      border-top: 3px solid var(--primary-hover);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      vertical-align: middle;
-      margin-left: 8px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .image-block {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
+    .success { background: #e7f1ff; color: #0071e3; }
+    .error { background: #fff3f3; color: #d93025; }
     .image-block img {
       max-height: 300px;
+      border-radius: 12px;
     }
   </style>
-</head>
-<body>
-  <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-  <h2>UseDesk Панель инструментов</h2>
 
-  <div class="image-block">
-    <img id="reactionImage" src="/images/no_fuck.png" alt="reaction" />
-  </div>
+    <style>
+      .theme-toggle {
+        position: fixed;
+        top: 10px;
+        right: 20px;
+        font-size: 20px;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+      .form-switcher {
+        margin-bottom: 20px;
+      }
+      .form-switcher button {
+        margin-right: 10px;
+        padding: 10px 15px;
+      }
+    </style>
+    </head>
+    
 
-  <button onclick="showForm('ticketForm')">📩 Создать тикет</button>
-  <button onclick="showForm('clientSearchForm')">🔍 Найти клиента</button>
-  <button onclick="showForm('createClientForm')">👤 Создать клиента</button>
-  <button onclick="showForm('updateClientForm')">🛠 Обновить клиента</button>
-
-  <form id="ticketForm" style="display:none">
+    <body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <div class="form-switcher">
+      <button onclick="showForm('ticketForm')">📩 Создать тикет</button>
+      <button onclick="showForm('clientSearchForm')">🔍 Найти клиента</button>
+      <button onclick="showForm('createClientForm')">👤 Создать клиента</button>
+      <button onclick="showForm('updateClientForm')">🛠 Обновить клиента</button>
+    </div>
+    
+  <form id="ticketForm" style="display:block;">
+    <h2>Создать тикет</h2>
     <label>Тема:</label>
     <input type="text" name="subject" required>
     <label>Сообщение:</label>
@@ -196,16 +119,20 @@
       <option value="6">В ожидании</option>
       <option value="9">Рассылка</option>
     </select>
-    <button type="submit" id="submitTicket">Создать тикет</button>
+    <button type="submit">Создать тикет</button>
+    <div id="responseMessage1"></div>
   </form>
 
-  <form id="clientSearchForm" style="display:none">
-    <label>Поиск клиента:</label>
+  <form id="clientSearchForm" style="display:none;">
+    <h2>Найти клиента</h2>
+    <label>Телефон / email:</label>
     <input type="text" name="query" required>
     <button type="submit">Найти клиента</button>
+    <div id="responseMessage2"></div>
   </form>
 
-  <form id="createClientForm" style="display:none">
+  <form id="createClientForm" style="display:none;">
+    <h2>Создать клиента</h2>
     <label>Имя:</label>
     <input type="text" name="name">
     <label>Email:</label>
@@ -215,9 +142,11 @@
     <label>Заметка:</label>
     <input type="text" name="note">
     <button type="submit">Создать клиента</button>
+    <div id="responseMessage3"></div>
   </form>
 
-  <form id="updateClientForm" style="display:none">
+  <form id="updateClientForm" style="display:none;">
+    <h2>Обновить клиента</h2>
     <label>ID клиента:</label>
     <input type="text" name="client_id">
     <label>Имя:</label>
@@ -229,45 +158,28 @@
     <label>Заметка:</label>
     <input type="text" name="note">
     <button type="submit">Обновить клиента</button>
+    <div id="responseMessage4"></div>
   </form>
 
-  <div id="responseMessage"></div>
+  <div class="image-block">
+    <img src="/images/no_fuck.png" alt="Фото">
+  </div>
 
   <script>
-    function toggleTheme() {
-      const body = document.body;
-      const dark = body.classList.toggle('dark-mode');
-      document.querySelector('.theme-toggle').textContent = dark ? '☀️' : '🌙';
-    }
-
-    function showForm(id) {
-      document.querySelectorAll("form").forEach(f => f.style.display = "none");
-      document.getElementById(id).style.display = "block";
-    }
-
     function normalizePhone(raw) {
-      const cleaned = raw.replace(/[^0-9]/g, '');
-      if (cleaned.length < 11) return null;
+      const cleaned = raw.replace(/\D/g, '');
       return cleaned.replace(/^8/, '7').replace(/^\+7/, '7');
     }
 
-    document.querySelectorAll("form").forEach(form => {
+    document.querySelectorAll("form").forEach((form, index) => {
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
-        const btn = form.querySelector("button[type='submit']");
-        const original = btn.innerHTML;
-        btn.innerHTML = '⏳<span class="loader"></span>';
-        btn.disabled = true;
-
         const data = Object.fromEntries(new FormData(form));
-        const formId = form.id;
-        let path = "";
-        let bodyData = {};
-
-        if (formId === "ticketForm") {
-          path = "/create-ticket";
-          bodyData = {
+        let payload = {};
+        let endpoint = "";
+        if (form.id === "ticketForm") {
+          endpoint = "/create-ticket";
+          payload = {
             api_token: "12ff4f2af60aee0fe6869cec6e2c8401df7980b7",
             subject: data.subject,
             message: data.message,
@@ -275,26 +187,27 @@
             channel_id: "66235",
             from: "user",
             tag: data.tag,
+            status: data.status,
             user_id: data.user_id,
-            status: data.status
+            assignee_id: data.user_id
           };
           if (data.message_type === "comment") {
-            bodyData.private_comment = "true";
+            payload.private_comment = "true";
           }
-        } else if (formId === "clientSearchForm") {
-          path = "/search-client";
-          bodyData = { query: normalizePhone(data.query) || data.query };
-        } else if (formId === "createClientForm") {
-          path = "/create-client";
-          bodyData = {
+        } else if (form.id === "clientSearchForm") {
+          endpoint = "/search-client";
+          payload = { query: normalizePhone(data.query) || data.query };
+        } else if (form.id === "createClientForm") {
+          endpoint = "/create-client";
+          payload = {
             name: data.name,
             emails: data.emails,
             phone: normalizePhone(data.phone),
             note: data.note
           };
-        } else if (formId === "updateClientForm") {
-          path = "/update-client";
-          bodyData = {
+        } else if (form.id === "updateClientForm") {
+          endpoint = "/update-client";
+          payload = {
             client_id: data.client_id,
             name: data.name,
             emails: data.emails,
@@ -303,18 +216,28 @@
           };
         }
 
-        const res = await fetch(path, {
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(bodyData)
+          body: JSON.stringify(payload)
         });
 
         const resText = await res.text();
-        document.getElementById("responseMessage").innerHTML = `<div class="response-box success">${resText}</div>`;
-        btn.innerHTML = original;
-        btn.disabled = false;
+        document.getElementById("responseMessage" + (index + 1)).innerHTML = '<div class="response-box success">' + resText + '</div>';
       });
     });
-  </script>
+  
+    function toggleTheme() {
+      const body = document.body;
+      const dark = body.classList.toggle('dark-mode');
+      document.querySelector('.theme-toggle').textContent = dark ? '☀️' : '🌙';
+    }
+
+    function showForm(id) {
+      document.querySelectorAll('form').forEach(f => f.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+    }
+    </script>
+    
 </body>
 </html>
